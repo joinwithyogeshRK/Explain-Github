@@ -3,18 +3,21 @@ import { supabase } from "../lib/supabase.js";
 import { ensureSupabaseUser, getPrimaryEmail } from "./userService.js";
 
 export async function getUserGithubToken(
-  clerkUserId: string
+  userId: string   // ← this is supabase UUID
 ): Promise<string | null> {
 
+  console.log("🔍 Looking for token with supabase userId:", userId)
+
   const { data, error } = await supabase
-    .from('users')                      // ← correct table ✅
-    .select('github_access_token')      // ← correct column ✅
-    .eq('clerk_user_id', clerkUserId)   // ← correct filter ✅
+    .from('users')
+    .select('github_access_token')
+    .eq('id', userId)              // ← changed from clerk_user_id to id
     .single()
 
+  console.log("🔍 Query result:", data)
+  console.log("🔍 Error:", error)
+
   if (error || !data?.github_access_token) return null
-  console.log("lets see if token comes")
-  console.log("data.github_access_token", data.github_access_token)
   return data.github_access_token
 }
 
