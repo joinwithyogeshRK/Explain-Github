@@ -74,6 +74,7 @@ export function buildAuthorizeUrl(clerkUserId: string): string {
 }
 
 function safeEqualHex(a: string, b: string): boolean {
+  // Timing-safe comparison to protect against length-based signature attacks.
   try {
     const ba = Buffer.from(a, "hex");
     const bb = Buffer.from(b, "hex");
