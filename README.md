@@ -1,89 +1,290 @@
-# Oracle
+# 🤖 Oracle — Production-Grade AI RAG Assistant
 
-Oracle is a full-stack RAG assistant for asking grounded questions over uploaded documents and GitHub repositories.
+<div align="center">
 
-> See `CONTRIBUTING.md` for the project commit style, documentation expectations, and collaboration workflow.
+### Ask grounded questions over your documents and GitHub repositories with intelligent retrieval.
 
-The backend handles ingestion, chunking, embeddings, hybrid retrieval, reranking, answer generation, and evaluation. The frontend provides the chat and repository indexing experience.
+**Full-stack Retrieval-Augmented Generation (RAG) platform with hybrid search, reranking, OCR ingestion, repository indexing, speech transcription, and evaluation pipelines.**
 
-## 🚀 Deployment
+[🚀 Live Demo](https://oracle-lyart-six.vercel.app/) • [💻 Repository](https://github.com/tush-dev/Oracle)
 
-Ready to deploy? See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete guides on deploying to Vercel, Render, Railway, and more.
+</div>
 
-> The repository is maintained with a CI workflow that validates backend build and docs updates before merge.
+---
 
-For backend-specific setup, see `backend/.env.example` and `backend/README.md`.
+## ✨ Overview
 
-## RAG Pipeline
+Oracle is a production-focused **AI knowledge assistant** designed to provide accurate, grounded answers from uploaded documents and GitHub repositories.
 
-1. Documents and repository files are parsed into clean text.
-2. Structure-aware chunkers split content by headings, tables, functions, classes, and file boundaries.
-3. Voyage embeddings are stored in Pinecone with source metadata.
-4. Retrieval combines vector search with BM25 keyword matching through reciprocal rank fusion.
-5. Cohere reranking improves the final context order before generation.
-6. Groq generates answers with strict grounding instructions.
-7. A RAG evaluator scores faithfulness, answer relevance, and context precision.
+Instead of relying on generic LLM responses, Oracle retrieves relevant context from your actual data using a sophisticated retrieval pipeline before generating answers.
 
-## Tech Stack
+It combines:
 
-- Frontend: React, Vite, TypeScript
-- Backend: Express, TypeScript
-- Vector store: Pinecone
-- Embeddings: Voyage AI
-- Reranking: Cohere
-- Generation and evaluation: Groq
-- Auth and storage helpers: Clerk, Supabase
+- 📄 Document ingestion
+- 🐙 GitHub repository indexing
+- 🔍 Hybrid semantic + keyword retrieval
+- 🧠 Context reranking
+- 🎤 Speech transcription
+- 📊 RAG evaluation metrics
+- ⚡ Real-time chat interface
 
-## Architecture
+This makes Oracle ideal for:
 
-Oracle is built as a clean two-tier architecture with a focused backend for retrieval and a polished frontend for chat.
+- Developer documentation assistants
+- Repository Q&A systems
+- Internal enterprise knowledge assistants
+- Research document querying
+- Technical codebase exploration
 
-### Backend
+---
 
-- `backend/src/rag`
-  - Ingestion, text chunking, embedding creation, retrieval, reranking, and evaluation.
-  - Contains vector search, BM25 hybrid ranking, and grounding logic.
-- `backend/src/routes`
-  - REST endpoints for document lifecycle, GitHub indexing, history, PDF uploads, and transcription.
-  - REST API endpoints for documents, GitHub indexing, chat history, PDF uploads, and transcription.
-- `backend/src/services`
-  - Integration helpers for Clerk auth, Supabase storage, OCR, GitHub OAuth, and repo tree traversal.
-- `backend/src/lib`
-  - Shared abstractions for external APIs and provider wrappers.
+# 🚀 Key Features
 
-### Frontend
+## 📂 Multi-Source Knowledge Ingestion
 
-- `frontend/src/pages`
-  - Main view components: chat experience, GitHub OAuth callback handling, and page-level routing.
-- `frontend/src/components`
-  - Reusable UI primitives: header, sidebar, message list, input bar, background visuals, and GitHub helpers.
-- `frontend/src/hooks`
-  - Client-side helpers such as audio recording and transcription state.
-- `frontend/src/lib`
-  - API client and source label utilities.
+Oracle can ingest and understand content from multiple sources:
 
-### Data flow
+✅ PDF documents  
+✅ GitHub repositories  
+✅ OCR-extracted scanned content  
+✅ Audio transcription workflows  
 
-1. A user uploads a PDF or indexes a GitHub repo.
-2. The backend parses content, chunks it, generates embeddings, and stores vectors with source metadata.
-3. User queries trigger hybrid retrieval: vector search plus BM25 scoring.
-4. The candidate context is reranked and passed to Groq for grounded answer generation.
-5. Responses are surfaced in the frontend chat UI with rich source selection and history.
+---
 
-## Project Layout
+## 🧠 Advanced RAG Pipeline
+
+Unlike basic chatbot wrappers, Oracle uses a robust retrieval architecture:
+
+- Structure-aware chunking
+- Semantic vector retrieval
+- BM25 keyword retrieval
+- Reciprocal Rank Fusion (RRF)
+- Cohere reranking
+- Grounded answer generation
+- Automated RAG evaluation
+
+This improves factual accuracy and reduces hallucinations.
+
+---
+
+## 🐙 GitHub Repository Intelligence
+
+Index entire repositories and ask questions like:
+
+> “How does authentication work?”  
+> “Where is the API routing implemented?”  
+> “Which file handles embeddings?”  
+> “Explain the database architecture.”
+
+Oracle parses repository trees, extracts meaningful code context, and enables intelligent codebase querying.
+
+---
+
+## 🎤 Speech + OCR Support
+
+Supports richer input workflows:
+
+- Audio transcription using AssemblyAI
+- OCR extraction from scanned PDFs
+- Voice-driven knowledge querying
+
+---
+
+## 📊 RAG Evaluation Layer
+
+Oracle includes evaluation pipelines to assess response quality using:
+
+- Faithfulness
+- Answer relevance
+- Context precision
+
+This makes the system engineering-focused—not just UI-focused.
+
+---
+
+# 🏗 Architecture
+
+## System Flow
 
 ```text
-backend/src/rag        RAG ingestion, retrieval, reranking, evaluation
-backend/src/routes     API routes for documents, GitHub, history, audio
-backend/src/services   OAuth, OCR, user, history, repo tree helpers
-backend/src/lib        external API wrappers and shared helpers
-frontend/src/pages     page-level React views
-frontend/src/components reusable UI components
-frontend/src/hooks     client-side behavior hooks
-frontend/src/lib       frontend API and source utilities
+User Query
+   ↓
+Frontend Chat UI
+   ↓
+Backend API Layer
+   ↓
+Document / GitHub Ingestion
+   ↓
+Text Parsing + Structure-Aware Chunking
+   ↓
+Embedding Generation (Voyage AI)
+   ↓
+Pinecone Vector Storage
+   ↓
+Hybrid Retrieval (Vector + BM25)
+   ↓
+Reciprocal Rank Fusion
+   ↓
+Cohere Reranking
+   ↓
+Groq Answer Generation
+   ↓
+RAG Evaluation
+   ↓
+Grounded Response to User
 ```
 
-## Local Development
+---
+
+# 🔬 RAG Pipeline Deep Dive
+
+## 1. Content Ingestion
+
+Documents and repositories are parsed into clean structured text.
+
+Supported ingestion:
+
+- PDFs
+- GitHub repositories
+- OCR-extracted content
+- speech transcripts
+
+---
+
+## 2. Intelligent Chunking
+
+Instead of naive fixed-size chunking, Oracle uses structure-aware segmentation:
+
+- heading boundaries
+- function blocks
+- class boundaries
+- file segmentation
+- table-aware chunking
+
+This preserves semantic meaning during retrieval.
+
+---
+
+## 3. Embedding Generation
+
+Chunks are converted into dense semantic vectors using:
+
+**Voyage AI embeddings**
+
+Each chunk is enriched with source metadata for grounded retrieval.
+
+---
+
+## 4. Hybrid Retrieval
+
+Oracle combines:
+
+### Semantic Search
+Dense vector similarity from Pinecone.
+
+### Keyword Search
+BM25 lexical retrieval.
+
+Then merges both via:
+
+**Reciprocal Rank Fusion (RRF)**
+
+This significantly improves recall.
+
+---
+
+## 5. Reranking
+
+Retrieved candidates are reranked using:
+
+**Cohere Rerank API**
+
+This ensures only the most relevant context reaches the LLM.
+
+---
+
+## 6. Grounded Generation
+
+Final context is passed to:
+
+**Groq LLM inference**
+
+with strict grounding instructions to reduce hallucination.
+
+---
+
+## 7. Evaluation
+
+Generated responses are scored on:
+
+- faithfulness
+- relevance
+- precision
+
+to monitor answer quality.
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
+
+- React
+- Vite
+- TypeScript
+
+## Backend
+
+- Node.js
+- Express
+- TypeScript
+
+## AI / Retrieval
+
+- Pinecone
+- Voyage AI
+- Cohere
+- Groq
+- BM25
+- Reciprocal Rank Fusion
+
+## Integrations
+
+- GitHub API
+- Clerk
+- Supabase
+- OCR services
+- AssemblyAI
+
+## Deployment
+
+- Vercel
+
+---
+
+# 📁 Project Structure
+
+```text
+backend/
+ ┣ src/
+ ┃ ┣ rag/          → ingestion, chunking, retrieval, reranking, evaluation
+ ┃ ┣ routes/       → REST API endpoints
+ ┃ ┣ services/     → GitHub, OCR, auth, storage integrations
+ ┃ ┗ lib/          → provider wrappers and shared utilities
+
+frontend/
+ ┣ src/
+ ┃ ┣ pages/        → main application screens
+ ┃ ┣ components/   → reusable UI components
+ ┃ ┣ hooks/        → frontend custom hooks
+ ┃ ┗ lib/          → API utilities
+```
+
+---
+
+# ⚙️ Local Setup
+
+## Backend
 
 ```bash
 cd backend
@@ -93,14 +294,62 @@ npm run build
 npm run dev
 ```
 
+---
+
+## Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Copy `backend/.env.example` to `backend/.env` and fill in the provider keys before running the backend.
+---
 
-See `CONTRIBUTING.md` for guidance on commit style and incremental documentation updates.
+# 🌍 Deployment
 
-The repository includes a build validation workflow at `.github/workflows/nodejs-ci.yml` and a license file at `LICENSE`.
+Oracle supports deployment across modern platforms.
+
+See:
+
+- Vercel
+- Render
+- Railway
+
+Detailed deployment instructions:
+
+```bash
+DEPLOYMENT.md
+```
+
+---
+
+# 🎯 Why This Project Matters
+
+Oracle demonstrates practical software engineering + applied AI concepts:
+
+✅ Production-grade RAG architecture  
+✅ Retrieval engineering  
+✅ Hybrid search systems  
+✅ LLM grounding strategies  
+✅ AI evaluation pipelines  
+✅ GitHub repository intelligence  
+✅ Full-stack TypeScript architecture  
+✅ Real-world deployment workflows  
+
+---
+
+# 👨‍💻 Author
+
+**Tushar Panwar**
+
+B.Tech @ NIT Jalandhar  
+Full-Stack Developer | AI Engineering Enthusiast
+
+---
+
+<div align="center">
+
+### ⭐ If you found this interesting, consider starring the repo.
+
+</div>
