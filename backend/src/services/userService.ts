@@ -71,6 +71,7 @@ export async function ensureSupabaseUser(
   });
 
   // Handle rare race conditions where the same Clerk user may be inserted concurrently.
+  // If the row already exists, re-query it and return the existing UUID.
   if (insErr?.code === "23505") {
     const { data: retry, error: rErr } = await supabase
       .from("users")
