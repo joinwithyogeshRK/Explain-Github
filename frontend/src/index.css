@@ -1,0 +1,154 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100dvh;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app-root {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  overflow-x: hidden !important;
+}
+
+.app-shell {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding-left: max(12px, env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(12px, env(safe-area-inset-right, 0px)) !important;
+  padding-top: max(16px, env(safe-area-inset-top, 0px)) !important;
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.app-header {
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.app-header-left {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.app-header-right {
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: 6px !important;
+}
+
+.message-body {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.message-answer-row {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.message-answer-card {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+.message-answer-text {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+.input-bar-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.input-bar-field {
+  min-width: 0 !important;
+}
+
+.input-bar-footer {
+  text-align: center !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  padding: 0 4px !important;
+}
+
+@media (max-width: 640px) {
+  .app-header .header-live-pill {
+    display: none !important;
+  }
+
+  .app-header .header-brand-sub {
+    display: none !important;
+  }
+
+  .app-header .header-brand-name {
+    letter-spacing: 0.12em !important;
+    font-size: 14px !important;
+  }
+
+  .app-header .header-new-chat-label {
+    display: none !important;
+  }
+
+  .app-header .header-signup {
+    display: none !important;
+  }
+
+  .app-header .header-chat-id {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .input-bar-wrap {
+    flex-wrap: wrap !important;
+    align-items: stretch !important;
+    min-height: auto !important;
+    row-gap: 4px !important;
+  }
+
+  .input-bar-field {
+    flex: 1 1 100% !important;
+    order: -1 !important;
+    width: 100% !important;
+    padding: 8px 12px 4px !important;
+  }
+
+  .input-bar-left,
+  .input-bar-right {
+    flex: 1 1 auto !important;
+  }
+
+  .input-bar-right {
+    justify-content: flex-end !important;
+    margin-left: auto !important;
+  }
+}

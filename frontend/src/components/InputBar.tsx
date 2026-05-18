@@ -401,7 +401,7 @@ export const InputBar = ({
       </AnimatePresence>
 
       {/* ── MAIN INPUT BAR — clean, uncluttered ── */}
-      <motion.div style={{
+      <motion.div className="input-bar-wrap" style={{
         ...s.inputWrap, position: "relative",
         opacity: signedIn ? 1 : 0.72,
         boxShadow: isRecording
@@ -416,7 +416,7 @@ export const InputBar = ({
       }} transition={{ duration: 0.25 }}>
 
         {/* Left: PDF + Repo */}
-        <div style={s.leftCluster}>
+        <div className="input-bar-left" style={s.leftCluster}>
           <AnimatePresence mode="wait">
             {!file ? (
               <Tooltip text="Upload a PDF">
@@ -522,6 +522,7 @@ export const InputBar = ({
         {/* Text input */}
         <input
           ref={inputRef}
+          className="input-bar-field"
           style={{ ...s.input, cursor: signedIn ? "text" : "not-allowed" }}
           type="text"
           placeholder={placeholder}
@@ -534,7 +535,7 @@ export const InputBar = ({
         />
 
         {/* Right: Mic + Send */}
-        <div style={s.rightCluster}>
+        <div className="input-bar-right" style={s.rightCluster}>
           <AnimatePresence mode="wait">
             {isTranscribing ? (
               <motion.div key="transcribing" style={s.transcribingDot}
@@ -602,7 +603,7 @@ export const InputBar = ({
 
       {/* Footer */}
       <div style={s.footer}>
-        <span style={s.footerText}>
+        <span className="input-bar-footer" style={s.footerText}>
           <kbd style={s.kbd}>↵</kbd> send &nbsp;·&nbsp;
           <kbd style={s.kbd}>🎙</kbd> voice &nbsp;·&nbsp;
           {selectedSource !== "all"
@@ -690,6 +691,7 @@ const s: Record<string, React.CSSProperties> = {
     display: "flex", alignItems: "center",
     borderRadius: "14px", border: "1px solid #1a1a28",
     background: "#0c0c12", minHeight: "52px",
+    width: "100%", maxWidth: "100%", minWidth: 0,
     transition: "box-shadow 0.25s", overflow: "hidden",
   },
   signInGate: { position: "absolute", inset: 0, zIndex: 10, cursor: "pointer", border: "none", padding: 0, background: "transparent", borderRadius: "14px" },
@@ -720,7 +722,7 @@ const s: Record<string, React.CSSProperties> = {
     color: "#e0e0ec", fontSize: "13px",
     fontFamily: "'DM Sans','Segoe UI',sans-serif",
     letterSpacing: "0.01em", lineHeight: "1.5",
-    padding: "0 4px", minWidth: "80px",
+    padding: "0 4px", minWidth: 0,
   },
 
   stopSqRed:        { display: "block", width: "9px", height: "9px", borderRadius: "2px", background: "#f87171" },

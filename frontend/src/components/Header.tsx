@@ -18,12 +18,13 @@ interface Props {
 
 export const Header = ({ chatId, file, fileName, onRemoveFile, onNewChat, onOpenSidebar }: Props) => (
   <motion.header
+    className="app-header"
     style={s.header}
     initial={{ opacity: 0, y: -20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
   >
-    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+    <div className="app-header-left" style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: 0 }}>
       <motion.button
         onClick={onOpenSidebar}
         style={s.sidebarToggle}
@@ -43,15 +44,15 @@ export const Header = ({ chatId, file, fileName, onRemoveFile, onNewChat, onOpen
           <div style={s.brandCore} />
         </div>
         <div>
-          <div style={s.brandName}>ORACLE</div>
-          <div style={s.brandSub}>RAG Intelligence Engine</div>
+          <div className="header-brand-name" style={s.brandName}>ORACLE</div>
+          <div className="header-brand-sub" style={s.brandSub}>RAG Intelligence Engine</div>
         </div>
       </div>
     </div>
 
-    <div style={s.headerRight}>
+    <div className="app-header-right" style={s.headerRight}>
       {chatId && (
-        <motion.div style={s.chatIdPill} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}>
+        <motion.div className="header-chat-id" style={s.chatIdPill} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}>
           <span style={s.chatIdText}>#{chatId.slice(0, 8)}</span>
         </motion.div>
       )}
@@ -72,22 +73,22 @@ export const Header = ({ chatId, file, fileName, onRemoveFile, onNewChat, onOpen
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        NEW CHAT
+        <span className="header-new-chat-label">NEW CHAT</span>
       </motion.button>
 
-      <div style={s.livePill}>
+      <div className="header-live-pill" style={s.livePill}>
         <motion.span style={s.liveDot} animate={{ opacity: [1, 0.3, 1], scale: [1, 0.8, 1] }} transition={{ duration: 2, repeat: Infinity }} />
         <span style={s.liveLabel}>LIVE</span>
       </div>
 
       <Show when="signed-out">
         <SignInButton mode="modal">
-          <button type="button" style={s.authTrigger}>
+          <button type="button" className="header-auth-trigger" style={s.authTrigger}>
             Sign in
           </button>
         </SignInButton>
         <SignUpButton mode="modal">
-          <button type="button" style={{ ...s.authTrigger, color: "#9a9aa8" }}>
+          <button type="button" className="header-auth-trigger header-signup" style={{ ...s.authTrigger, color: "#9a9aa8" }}>
             Sign up
           </button>
         </SignUpButton>
@@ -107,18 +108,18 @@ export const Header = ({ chatId, file, fileName, onRemoveFile, onNewChat, onOpen
 );
 
 const s: Record<string, React.CSSProperties> = {
-  header: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexShrink: 0, padding: "0 4px" },
+  header: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexShrink: 0, padding: "0 4px", minWidth: 0, maxWidth: "100%", flexWrap: "wrap", gap: "10px" },
   brand: { display: "flex", alignItems: "center", gap: "14px" },
   brandIcon: { width: "42px", height: "42px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" },
   brandRing: { position: "absolute", inset: 0, borderRadius: "50%", border: "1.5px solid transparent", borderTopColor: "#c9a84c", borderRightColor: "#c9a84c44" },
   brandCore: { width: "18px", height: "18px", borderRadius: "50%", background: "radial-gradient(circle, #c9a84c 0%, #7a5820 100%)", boxShadow: "0 0 12px #c9a84c60" },
   brandName: { fontSize: "16px", fontWeight: 700, letterSpacing: "0.3em", color: "#c9a84c", lineHeight: 1 },
   brandSub: { fontSize: "9px", letterSpacing: "0.15em", color: "#6b6b78", marginTop: "4px", fontWeight: 400 },
-  headerRight: { display: "flex", alignItems: "center", gap: "10px" },
+  headerRight: { display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", minWidth: 0, maxWidth: "100%", justifyContent: "flex-end" },
   chatIdPill: { display: "flex", alignItems: "center", padding: "5px 11px", borderRadius: "999px", border: "1px solid #c9a84c33", background: "#c9a84c0a" },
   chatIdText: { fontSize: "10px", color: "#c9a84c88", letterSpacing: "0.1em" },
   headerFilePill: { display: "flex", alignItems: "center", gap: "7px", padding: "5px 11px", borderRadius: "999px", border: "1px solid #4ade8033", background: "#4ade800d" },
-  headerFileText: { fontSize: "10px", color: "#4ade80", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  headerFileText: { fontSize: "10px", color: "#4ade80", maxWidth: "72px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   headerFileX: { background: "none", border: "none", cursor: "pointer", color: "#6b6b78", fontSize: "10px", padding: 0, lineHeight: 1 },
   newChatBtn: { display: "flex", alignItems: "center", gap: "6px", padding: "6px 14px", borderRadius: "999px", border: "1px solid #222230", background: "#111118", color: "#6b6b78", fontSize: "9px", letterSpacing: "0.15em", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Mono',monospace", transition: "all 0.2s" },
   livePill: { display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "999px", border: "1px solid #222230", background: "#111118" },

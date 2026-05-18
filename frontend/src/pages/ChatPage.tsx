@@ -348,7 +348,7 @@ useEffect(() => {
   }
 
   return (
-    <div style={s.root}>
+    <div className="app-root" style={s.root}>
       <Background />
 
       <Sidebar
@@ -362,7 +362,7 @@ useEffect(() => {
         onDeleteChat={deleteChat}
       />
 
-      <div style={s.shell}>
+      <div className="app-shell" style={s.shell}>
         <Header
           chatId={chatId}
           file={file}
@@ -436,14 +436,15 @@ useEffect(() => {
 
 const s: Record<string, React.CSSProperties> = {
   root: {
-    width: "100vw", height: "100vh", background: "#08080a", overflow: "hidden",
+    width: "100%", maxWidth: "100%", minHeight: "100dvh", height: "100dvh",
+    background: "#08080a", overflow: "hidden", overflowX: "hidden",
     fontFamily: "'DM Mono','Fira Mono','Courier New',monospace",
     color: "#e2e2ec", position: "relative", display: "flex",
   },
   shell: {
     position: "relative", zIndex: 1, display: "flex", flexDirection: "column",
     width: "100%", height: "100%", maxWidth: "900px", margin: "0 auto",
-    padding: "24px 20px 20px", boxSizing: "border-box",
+    minWidth: 0, padding: "24px 20px 20px", boxSizing: "border-box",
   },
   loadingBar:     { height: "2px", background: "#1a1a24", overflow: "hidden", flexShrink: 0, position: "relative" },
   loadingBarFill: { position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent, #c9a84c, transparent)", width: "40%" },

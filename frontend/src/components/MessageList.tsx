@@ -14,7 +14,7 @@ export const MessageList = ({ history, isStreaming, response, currentQ, scrollRe
   const isEmpty = history.length === 0 && !isStreaming && !response;
 
   return (
-    <div style={s.body} ref={scrollRef}>
+    <div className="message-body" style={s.body} ref={scrollRef}>
       <AnimatePresence>
         {isEmpty && (
           <motion.div style={s.emptyState} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.6 }}>
@@ -48,12 +48,12 @@ export const MessageList = ({ history, isStreaming, response, currentQ, scrollRe
               <p style={s.questionText}>{item.q}</p>
             </div>
           </div>
-          <div style={s.answerRow}>
+          <div className="message-answer-row" style={s.answerRow}>
             <div style={s.answerAvatar}><div style={s.avatarInner}>O</div></div>
-            <div style={s.answerCard}>
+            <div className="message-answer-card" style={s.answerCard}>
               <div style={s.answerBar} />
               <span style={s.answerLabel}>ORACLE</span>
-              <p style={s.answerText}>{item.a}</p>
+              <p className="message-answer-text" style={s.answerText}>{item.a}</p>
             </div>
           </div>
         </motion.div>
@@ -70,11 +70,11 @@ export const MessageList = ({ history, isStreaming, response, currentQ, scrollRe
                 </div>
               </div>
             )}
-            <div style={s.answerRow}>
+            <div className="message-answer-row" style={s.answerRow}>
               <div style={s.answerAvatar}>
                 <motion.div style={s.avatarInner} animate={{ boxShadow: ["0 0 0px #c9a84c00", "0 0 16px #c9a84c88", "0 0 0px #c9a84c00"] }} transition={{ duration: 1.5, repeat: Infinity }}>O</motion.div>
               </div>
-              <div style={s.answerCard}>
+              <div className="message-answer-card" style={s.answerCard}>
                 <div style={s.answerBar} />
                 <div style={s.answerHeaderRow}>
                   <span style={s.answerLabel}>ORACLE</span>
@@ -90,7 +90,7 @@ export const MessageList = ({ history, isStreaming, response, currentQ, scrollRe
                     ))}
                   </div>
                 ) : (
-                  <p style={s.answerText}>
+                  <p className="message-answer-text" style={s.answerText}>
                     {response}
                     <motion.span style={s.cursor} animate={{ opacity: [1, 0] }} transition={{ duration: 0.5, repeat: Infinity }} />
                   </p>
@@ -105,7 +105,7 @@ export const MessageList = ({ history, isStreaming, response, currentQ, scrollRe
 };
 
 const s: Record<string, React.CSSProperties> = {
-  body: { flex: 1, minHeight: 0, overflowY: "auto", overflowX: "hidden", padding: "8px 4px 16px", scrollbarWidth: "thin", scrollbarColor: "#222230 transparent", display: "flex", flexDirection: "column", gap: "32px" },
+  body: { flex: 1, minHeight: 0, minWidth: 0, overflowY: "auto", overflowX: "hidden", padding: "8px 4px 16px", scrollbarWidth: "thin", scrollbarColor: "#222230 transparent", display: "flex", flexDirection: "column", gap: "32px" },
   emptyState: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 20px", gap: "20px", textAlign: "center" },
   emptyOrb: { width: "80px", height: "80px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" },
   emptyOrbRing: { position: "absolute", inset: 0, borderRadius: "50%", border: "1.5px solid transparent", borderTopColor: "#c9a84c66", borderRightColor: "#c9a84c22" },
@@ -116,17 +116,17 @@ const s: Record<string, React.CSSProperties> = {
   emptyTag: { fontSize: "10px", letterSpacing: "0.12em", padding: "5px 12px", borderRadius: "999px", border: "1px solid #222230", color: "#4a4a58", background: "#111118" },
   turn: { display: "flex", flexDirection: "column", gap: "16px" },
   questionRow: { display: "flex", justifyContent: "flex-end" },
-  questionBubble: { maxWidth: "70%", background: "#141420", border: "1px solid #252535", borderRadius: "16px 16px 4px 16px", padding: "14px 18px" },
+  questionBubble: { maxWidth: "min(85%, 100%)", background: "#141420", border: "1px solid #252535", borderRadius: "16px 16px 4px 16px", padding: "14px 18px" },
   questionLabel: { fontSize: "9px", letterSpacing: "0.2em", color: "#6b6b78", display: "block", marginBottom: "6px" },
   questionText: { margin: 0, fontSize: "14px", lineHeight: "1.7", color: "#c8c8d8", fontFamily: "'DM Sans','Segoe UI',sans-serif", fontWeight: 400 },
-  answerRow: { display: "flex", gap: "14px", alignItems: "flex-start" },
+  answerRow: { display: "flex", gap: "14px", alignItems: "flex-start", minWidth: 0, maxWidth: "100%" },
   answerAvatar: { width: "38px", height: "38px", flexShrink: 0, borderRadius: "50%", border: "1.5px solid #c9a84c44", display: "flex", alignItems: "center", justifyContent: "center", background: "#111118" },
   avatarInner: { fontSize: "14px", fontWeight: 700, color: "#c9a84c", letterSpacing: "0.05em" },
-  answerCard: { flex: 1, background: "#0e0e14", border: "1px solid #1e1e2a", borderRadius: "4px 16px 16px 16px", padding: "16px 18px", position: "relative", overflow: "hidden" },
+  answerCard: { flex: 1, minWidth: 0, background: "#0e0e14", border: "1px solid #1e1e2a", borderRadius: "4px 16px 16px 16px", padding: "16px 18px", position: "relative", overflow: "hidden", overflowWrap: "anywhere" },
   answerBar: { position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #c9a84c 0%, #c9a84c55 60%, transparent 100%)" },
   answerHeaderRow: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" },
   answerLabel: { fontSize: "9px", letterSpacing: "0.2em", color: "#c9a84c88", display: "block" },
-  answerText: { margin: 0, fontSize: "14px", lineHeight: "1.85", color: "#d0d0e0", fontFamily: "'DM Sans','Segoe UI',sans-serif", whiteSpace: "pre-wrap", fontWeight: 400 },
+  answerText: { margin: 0, fontSize: "14px", lineHeight: "1.85", color: "#d0d0e0", fontFamily: "'DM Sans','Segoe UI',sans-serif", whiteSpace: "pre-wrap", fontWeight: 400, overflowWrap: "anywhere", wordBreak: "break-word" },
   generatingBadge: { display: "flex", alignItems: "center", gap: "5px", padding: "2px 9px", borderRadius: "999px", border: "1px solid #c9a84c33", background: "#c9a84c0a" },
   genDot: { display: "inline-block", width: "5px", height: "5px", borderRadius: "50%", background: "#c9a84c" },
   genLabel: { fontSize: "8px", letterSpacing: "0.2em", color: "#c9a84c88", fontWeight: 600 },
