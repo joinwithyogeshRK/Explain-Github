@@ -48,13 +48,13 @@ export const Sidebar = ({
           onClick={onClose}
         />
         <motion.aside
-          className="fixed bottom-0 left-0 top-0 z-20 flex w-[min(300px,88vw)] flex-col border-r border-border bg-card shadow-2xl"
+          className="glass-panel fixed bottom-0 left-0 top-0 z-20 flex w-[min(320px,88vw)] flex-col border-r border-border"
           initial={{ x: -320 }}
           animate={{ x: 0 }}
           exit={{ x: -320 }}
           transition={{ type: "spring", damping: 28, stiffness: 260 }}
         >
-          <div className="flex items-center justify-between border-b border-border px-4 py-5">
+          <div className="flex items-center justify-between border-b border-border/80 px-4 py-5">
             <span className="font-mono text-[10px] font-semibold tracking-[0.25em] text-accent">
               CHAT HISTORY
             </span>
@@ -74,7 +74,7 @@ export const Sidebar = ({
               onNewChat()
               onClose()
             }}
-            className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-dashed border-border px-3.5 py-2.5 font-mono text-[10px] font-semibold tracking-wider text-muted-foreground transition-colors hover:border-accent/40 hover:text-accent"
+            className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-dashed border-accent/25 bg-accent/5 px-3.5 py-2.5 font-mono text-[10px] font-semibold tracking-wider text-accent/80 transition-colors hover:border-accent/45 hover:bg-accent/10 hover:text-accent"
           >
             <Plus className="h-3 w-3" />
             NEW CHAT
@@ -107,8 +107,10 @@ export const Sidebar = ({
                   onClick={() => onSelectChat(chat.id)}
                   onKeyDown={(e) => e.key === "Enter" && onSelectChat(chat.id)}
                   className={cn(
-                    "relative mb-0.5 cursor-pointer rounded-xl px-3 py-2.5 transition-colors hover:bg-muted",
-                    activeChatId === chat.id && "bg-muted"
+                    "relative mb-1 cursor-pointer rounded-xl border px-3 py-2.5 transition-colors hover:border-border hover:bg-white/55 dark:hover:bg-muted",
+                    activeChatId === chat.id
+                      ? "border-accent/25 bg-accent/10 shadow-sm"
+                      : "border-transparent"
                   )}
                 >
                   <div className="flex items-center gap-2.5">

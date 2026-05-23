@@ -21,22 +21,31 @@
 }
 
 :root {
-  --background: #f8f8fa;
-  --foreground: #12121a;
-  --card: #ffffff;
-  --card-foreground: #12121a;
-  --muted: #f0f0f5;
-  --muted-foreground: #6b6b7a;
-  --border: #e4e4ec;
-  --input: #e4e4ec;
-  --ring: #c9a84c;
-  --accent: #c9a84c;
-  --accent-foreground: #1a1408;
-  --destructive: #ef4444;
-  --success: #16a34a;
-  --orb-a: #c9a84c18;
-  --orb-b: #6366f114;
-  --grid-stroke: #c9a84c14;
+  --background: #f4f7fb;
+  --foreground: #151925;
+  --card: #ffffffcc;
+  --card-foreground: #151925;
+  --muted: #eaf0f7;
+  --muted-foreground: #657084;
+  --border: #d9e2ee;
+  --input: #d3deeb;
+  --ring: #2f6f73;
+  --accent: #2f6f73;
+  --accent-foreground: #f8fbfc;
+  --destructive: #d44b4b;
+  --success: #168a57;
+  --panel: #ffffffeb;
+  --panel-strong: #ffffff;
+  --user-bubble: #e7f0f2;
+  --assistant-bubble: #ffffffee;
+  --brand-secondary: #b38728;
+  --brand-tertiary: #6c63d9;
+  --bg-glow-a: rgba(47, 111, 115, 0.13);
+  --bg-glow-b: rgba(179, 135, 40, 0.13);
+  --bg-glow-c: rgba(108, 99, 217, 0.09);
+  --grid-stroke: rgba(47, 111, 115, 0.12);
+  --shadow-soft: 0 24px 70px rgba(28, 44, 68, 0.13);
+  --shadow-float: 0 14px 36px rgba(28, 44, 68, 0.11);
 }
 
 .dark {
@@ -53,9 +62,18 @@
   --accent-foreground: #08080a;
   --destructive: #f87171;
   --success: #4ade80;
-  --orb-a: #c9a84c14;
-  --orb-b: #3a2a6014;
+  --panel: #0f0f14e6;
+  --panel-strong: #0f0f14;
+  --user-bubble: #14141c;
+  --assistant-bubble: #0f0f14;
+  --brand-secondary: #c9a84c;
+  --brand-tertiary: #8b7cf6;
+  --bg-glow-a: rgba(201, 168, 76, 0.08);
+  --bg-glow-b: rgba(58, 42, 96, 0.1);
+  --bg-glow-c: rgba(47, 111, 115, 0.08);
   --grid-stroke: #c9a84c12;
+  --shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --shadow-float: 0 14px 38px rgba(0, 0, 0, 0.34);
 }
 
 @layer base {
@@ -67,6 +85,8 @@
     @apply bg-background text-foreground font-sans;
     margin: 0;
     min-height: 100vh;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--background) 90%, white) 0%, var(--background) 45%, color-mix(in srgb, var(--background) 84%, var(--accent)) 100%);
   }
 
   #root {
@@ -78,6 +98,17 @@
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+  }
+
+  .glass-panel {
+    background: var(--panel);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(18px) saturate(1.18);
+  }
+
+  .float-panel {
+    background: var(--panel-strong);
+    box-shadow: var(--shadow-float);
   }
 }
 

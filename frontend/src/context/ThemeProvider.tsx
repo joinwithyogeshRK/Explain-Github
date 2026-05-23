@@ -1,22 +1,5 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react"
-
-export type Theme = "light" | "dark"
-
-interface ThemeContextValue {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  toggleTheme: () => void
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null)
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
+import { ThemeContext, type Theme } from "./theme"
 
 const STORAGE_KEY = "oracle-theme"
 
@@ -49,10 +32,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-}
-
-export function useTheme() {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) throw new Error("useTheme must be used within ThemeProvider")
-  return ctx
 }

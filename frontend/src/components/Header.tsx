@@ -5,7 +5,7 @@ import { AuthSection } from "./AuthSection"
 import { GithubOAuth } from "./GithubOAuth"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { getClerkAppearance } from "@/lib/clerk-appearance"
-import { useTheme } from "@/context/ThemeProvider"
+import { useTheme } from "@/context/theme"
 
 interface Props {
   chatId: string | null
@@ -17,7 +17,7 @@ interface Props {
 }
 
 const iconBtn =
-  "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:h-9 sm:w-9"
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card/80 text-muted-foreground shadow-sm transition-colors hover:border-accent/50 hover:bg-white hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 dark:hover:bg-muted sm:h-9 sm:w-9"
 
 export const Header = ({
   chatId,
@@ -32,7 +32,7 @@ export const Header = ({
 
   return (
     <motion.header
-      className="mb-3 flex shrink-0 flex-col gap-2 sm:mb-5 sm:gap-0"
+      className="glass-panel mb-3 flex shrink-0 flex-col gap-3 rounded-2xl border border-border/80 px-3 py-3 sm:mb-5 sm:px-4 sm:py-3.5"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -52,11 +52,11 @@ export const Header = ({
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div className="relative flex h-9 w-9 shrink-0 items-center justify-center sm:h-10 sm:w-10">
               <motion.div
-                className="absolute inset-0 rounded-full border border-transparent border-t-accent border-r-accent/30"
+                className="absolute inset-0 rounded-full border border-transparent border-t-accent border-r-[color:var(--brand-secondary)]/50"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
               />
-              <div className="h-4 w-4 rounded-full bg-accent shadow-[0_0_12px_color-mix(in_srgb,var(--accent)_40%,transparent)] sm:h-[18px] sm:w-[18px]" />
+              <div className="h-4 w-4 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--brand-secondary))] shadow-[0_0_18px_color-mix(in_srgb,var(--accent)_32%,transparent)] sm:h-[18px] sm:w-[18px]" />
             </div>
             <div className="min-w-0">
               <div className="truncate text-xs font-bold tracking-[0.2em] text-accent sm:text-sm sm:tracking-[0.28em]">
@@ -101,7 +101,7 @@ export const Header = ({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           {chatId && (
-            <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[9px] tracking-wider text-accent/80 sm:px-2.5 sm:py-1 sm:text-[10px]">
+            <span className="rounded-full border border-accent/25 bg-accent/10 px-2 py-0.5 font-mono text-[9px] tracking-wider text-accent/80 shadow-sm sm:px-2.5 sm:py-1 sm:text-[10px]">
               #{chatId.slice(0, 8)}
             </span>
           )}

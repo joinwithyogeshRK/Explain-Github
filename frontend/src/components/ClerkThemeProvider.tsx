@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { ClerkProvider } from "@clerk/react"
-import { useTheme } from "@/context/ThemeProvider"
+import { useTheme } from "@/context/theme"
 import { getClerkAppearance } from "@/lib/clerk-appearance"
 
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY

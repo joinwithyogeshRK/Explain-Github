@@ -387,7 +387,7 @@ const ChatPage = () => {
         onDeleteChat={deleteChat}
       />
 
-      <div className="relative z-[1] mx-auto flex h-full w-full max-w-[900px] flex-col px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 box-border sm:px-5 sm:pb-5 sm:pt-6">
+      <div className="relative z-[1] mx-auto flex h-full w-full max-w-[980px] flex-col px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 box-border sm:px-5 sm:pb-5 sm:pt-6 lg:px-7">
         <Header
           chatId={chatId}
           file={file}

@@ -51,48 +51,48 @@ export const MessageList = ({
   return (
     <div
       ref={scrollRef}
-      className="scrollbar-thin flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden px-1 py-2 sm:gap-8"
+      className="scrollbar-thin flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden px-1 py-3 sm:gap-8 sm:px-2"
     >
       <AnimatePresence>
         {isEmpty && (
           <motion.div
-            className="flex flex-1 flex-col items-center justify-center gap-5 px-3 py-8 text-center sm:gap-6 sm:px-5 sm:py-16"
+            className="flex flex-1 flex-col items-center justify-center gap-5 px-3 py-8 text-center sm:gap-6 sm:px-5 sm:py-14"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="relative flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl border border-border bg-card/80 shadow-[var(--shadow-float)] sm:h-20 sm:w-20">
               <motion.div
-                className="absolute inset-0 rounded-full border border-transparent border-t-accent/40 border-r-accent/15"
+                className="absolute inset-2 rounded-2xl border border-transparent border-t-accent/40 border-r-[color:var(--brand-secondary)]/40"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
               />
               <motion.div
-                className="absolute inset-2 rounded-full border border-transparent border-b-accent/30 border-l-accent/10"
+                className="absolute inset-4 rounded-xl border border-transparent border-b-[color:var(--brand-tertiary)]/35 border-l-accent/20"
                 animate={{ rotate: -360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
               />
               <Search className="h-6 w-6 text-accent sm:h-7 sm:w-7" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-wide text-foreground sm:text-xl">
+              <h2 className="text-xl font-semibold tracking-wide text-foreground sm:text-2xl">
                 Begin your inquiry
               </h2>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
                 Upload a PDF, use voice, or index a GitHub repo — then ask Oracle anything
                 about your sources.
               </p>
             </div>
-            <div className="grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
               {CAPABILITIES.map((cap) => {
                 const Icon = cap.icon
                 return (
                   <div
                     key={cap.title}
-                    className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card/80 p-4 text-left sm:items-start"
+                    className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card/80 p-4 text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-[var(--shadow-float)] sm:items-start"
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-muted text-accent">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10">
                       {cap.github ? (
                         <Icon className="h-4 w-4" />
                       ) : (
@@ -122,7 +122,7 @@ export const MessageList = ({
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="flex justify-end">
-            <div className="max-w-[92%] rounded-2xl rounded-br-md border border-border bg-muted px-3.5 py-3 sm:max-w-[75%] sm:px-4 sm:py-3.5">
+            <div className="max-w-[92%] rounded-2xl rounded-br-md border border-border bg-[var(--user-bubble)] px-3.5 py-3 shadow-sm sm:max-w-[75%] sm:px-4 sm:py-3.5">
               <span className="mb-1.5 block font-mono text-[9px] tracking-[0.2em] text-muted-foreground">
                 YOU
               </span>
@@ -130,11 +130,11 @@ export const MessageList = ({
             </div>
           </div>
           <div className="flex gap-3 sm:gap-3.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent/35 bg-card text-sm font-bold text-accent sm:h-9 sm:w-9">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-accent/25 bg-card text-sm font-bold text-accent shadow-sm sm:h-9 sm:w-9">
               O
             </div>
-            <div className="relative min-w-0 flex-1 overflow-hidden rounded-2xl rounded-tl-md border border-border bg-card px-3.5 py-3 sm:px-4 sm:py-3.5">
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-accent via-accent/40 to-transparent" />
+            <div className="relative min-w-0 flex-1 overflow-hidden rounded-2xl rounded-tl-md border border-border bg-[var(--assistant-bubble)] px-3.5 py-3 shadow-sm sm:px-4 sm:py-3.5">
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-accent via-[color:var(--brand-secondary)] to-transparent" />
               <span className="mb-2 block font-mono text-[9px] tracking-[0.2em] text-accent/70">
                 ORACLE
               </span>
@@ -156,7 +156,7 @@ export const MessageList = ({
           >
             {currentQ && (
               <div className="flex justify-end">
-                <div className="max-w-[92%] rounded-2xl rounded-br-md border border-border bg-muted px-3.5 py-3 sm:max-w-[75%] sm:px-4 sm:py-3.5">
+                <div className="max-w-[92%] rounded-2xl rounded-br-md border border-border bg-[var(--user-bubble)] px-3.5 py-3 shadow-sm sm:max-w-[75%] sm:px-4 sm:py-3.5">
                   <span className="mb-1.5 block font-mono text-[9px] tracking-[0.2em] text-muted-foreground">
                     YOU
                   </span>
@@ -166,7 +166,7 @@ export const MessageList = ({
             )}
             <div className="flex gap-3 sm:gap-3.5">
               <motion.div
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent/35 bg-card text-sm font-bold text-accent sm:h-9 sm:w-9"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-accent/25 bg-card text-sm font-bold text-accent shadow-sm sm:h-9 sm:w-9"
                 animate={{
                   boxShadow: [
                     "0 0 0px transparent",
@@ -178,8 +178,8 @@ export const MessageList = ({
               >
                 O
               </motion.div>
-              <div className="relative min-w-0 flex-1 overflow-hidden rounded-2xl rounded-tl-md border border-border bg-card px-3.5 py-3 sm:px-4 sm:py-3.5">
-                <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-accent via-accent/40 to-transparent" />
+              <div className="relative min-w-0 flex-1 overflow-hidden rounded-2xl rounded-tl-md border border-border bg-[var(--assistant-bubble)] px-3.5 py-3 shadow-sm sm:px-4 sm:py-3.5">
+                <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-accent via-[color:var(--brand-secondary)] to-transparent" />
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="font-mono text-[9px] tracking-[0.2em] text-accent/70">
                     ORACLE

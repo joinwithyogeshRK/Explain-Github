@@ -140,8 +140,8 @@ export function GithubOAuth() {
         className={cn(
           "relative flex h-9 w-9 items-center justify-center rounded-lg border bg-card transition-colors",
           connected
-            ? "border-accent/40 text-accent hover:bg-muted"
-            : "border-border text-muted-foreground hover:border-accent/50 hover:text-accent"
+            ? "border-accent/40 text-accent shadow-sm hover:bg-white dark:hover:bg-muted"
+            : "border-border text-muted-foreground shadow-sm hover:border-accent/50 hover:bg-white hover:text-accent dark:hover:bg-muted"
         )}
         onClick={() => void startGithubAuth()}
         disabled={busy || statusLoading}

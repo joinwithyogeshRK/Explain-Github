@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useClerk } from "@clerk/react"
 import { getClerkAppearance } from "@/lib/clerk-appearance"
-import { useTheme } from "@/context/ThemeProvider"
+import { useTheme } from "@/context/theme"
 import {
   ArrowUp,
   FileText,
@@ -64,7 +64,7 @@ interface Props {
 }
 
 const toolbarBtn =
-  "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:h-9 sm:w-9"
+  "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:h-9 sm:w-9"
 
 function useAutoResizeTextarea(minHeight: number, maxHeight = 200) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -125,7 +125,7 @@ function DeleteModal({
       onClick={onCancel}
     >
       <motion.div
-        className="flex w-full max-w-sm flex-col items-center gap-3.5 rounded-2xl border border-border bg-card p-7 shadow-2xl"
+        className="glass-panel flex w-full max-w-sm flex-col items-center gap-3.5 rounded-2xl border border-border p-7"
         initial={{ opacity: 0, scale: 0.92, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.92, y: 12 }}
@@ -527,7 +527,7 @@ export const InputBar = ({
       <AnimatePresence>
         {signedIn && hasDocs && (
           <motion.div
-            className="flex min-h-[34px] items-center gap-2 rounded-xl border border-border bg-card/80 px-2.5 py-1.5"
+            className="glass-panel flex min-h-[34px] items-center gap-2 rounded-xl border border-border/80 px-2.5 py-1.5 shadow-none"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
@@ -592,7 +592,7 @@ export const InputBar = ({
 
       <div
         className={cn(
-          "relative overflow-visible rounded-2xl border bg-card transition-shadow",
+          "glass-panel relative overflow-visible rounded-2xl border transition-shadow",
           ringClass,
           !signedIn && "opacity-75"
         )}
@@ -621,7 +621,7 @@ export const InputBar = ({
           />
         </div>
 
-        <div className="flex items-center justify-between gap-1 border-t border-border px-2 py-2 sm:gap-2 sm:px-3 sm:py-2.5">
+        <div className="flex items-center justify-between gap-1 border-t border-border/80 bg-white/25 px-2 py-2 dark:bg-white/[0.02] sm:gap-2 sm:px-3 sm:py-2.5">
           <div className="flex items-center gap-1 sm:gap-1.5">
             <AnimatePresence mode="wait">
               {!file ? (
@@ -630,7 +630,7 @@ export const InputBar = ({
                   key="attach"
                   className={cn(
                     toolbarBtn,
-                    "cursor-pointer border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+                    "cursor-pointer border-border bg-card/70 text-muted-foreground hover:bg-white hover:text-foreground dark:hover:bg-muted",
                     !signedIn && "pointer-events-none opacity-40"
                   )}
                   whileHover={signedIn ? { scale: 1.02 } : {}}
@@ -686,10 +686,10 @@ export const InputBar = ({
                     toolbarBtn,
                     "gap-1 px-2",
                     showRepo && githubConnected
-                      ? "border-indigo-400/50 bg-indigo-500/10 text-indigo-400"
+                      ? "border-indigo-400/50 bg-indigo-500/10 text-indigo-500 dark:text-indigo-400"
                       : githubConnected
-                        ? "border-accent/30 text-accent/80 hover:bg-muted"
-                        : "border-border text-muted-foreground hover:border-accent/40 hover:text-accent",
+                        ? "border-accent/30 bg-card/70 text-accent/80 hover:bg-white dark:hover:bg-muted"
+                        : "border-border bg-card/70 text-muted-foreground hover:border-accent/40 hover:bg-white hover:text-accent dark:hover:bg-muted",
                     !signedIn && "cursor-not-allowed opacity-40",
                     connectingGithub && "opacity-70"
                   )}
@@ -779,7 +779,7 @@ export const InputBar = ({
                       toolbarBtn,
                       isRecording
                         ? "border-destructive/50 bg-destructive/10 text-destructive"
-                        : "border-border text-muted-foreground hover:border-accent/40 hover:bg-muted hover:text-foreground",
+                        : "border-border bg-card/70 text-muted-foreground hover:border-accent/40 hover:bg-white hover:text-foreground dark:hover:bg-muted",
                       (!signedIn || isIndexing) && "cursor-not-allowed opacity-40"
                     )}
                     whileTap={signedIn && !isIndexing ? { scale: 0.93 } : {}}
@@ -832,7 +832,7 @@ export const InputBar = ({
                     className={cn(
                       toolbarBtn,
                       sendEnabled
-                        ? "border-transparent bg-foreground text-background shadow-md hover:opacity-90"
+                        ? "border-transparent bg-[linear-gradient(135deg,var(--accent),var(--brand-secondary))] text-accent-foreground shadow-[0_10px_24px_color-mix(in_srgb,var(--accent)_24%,transparent)] hover:opacity-95"
                         : "border-border bg-muted text-muted-foreground opacity-50"
                     )}
                     whileHover={sendEnabled ? { scale: 1.05 } : {}}

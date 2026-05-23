@@ -1,5 +1,5 @@
 import { dark } from "@clerk/themes"
-import type { Theme } from "@/context/ThemeProvider"
+import type { Theme } from "@/context/theme"
 
 const ACCENT = "#c9a84c"
 const ACCENT_FG = "#08080a"
@@ -8,11 +8,13 @@ const ACCENT_FG = "#08080a"
 export function getClerkAppearance(theme: Theme) {
   const isDark = theme === "dark"
 
-  const text = isDark ? "#e8e8f0" : "#12121a"
-  const textMuted = isDark ? "#a8a8bc" : "#6b6b7a"
+  const text = isDark ? "#e8e8f0" : "#151925"
+  const textMuted = isDark ? "#a8a8bc" : "#657084"
   const surface = isDark ? "#0f0f14" : "#ffffff"
-  const surfaceMuted = isDark ? "#14141c" : "#f8f8fa"
-  const border = isDark ? "#1e1e2a" : "#e4e4ec"
+  const surfaceMuted = isDark ? "#14141c" : "#eef4fa"
+  const border = isDark ? "#1e1e2a" : "#d9e2ee"
+  const primary = isDark ? ACCENT : "#2f6f73"
+  const primaryFg = isDark ? ACCENT_FG : "#f8fbfc"
 
   return {
     baseTheme: isDark ? dark : undefined,
@@ -26,8 +28,8 @@ export function getClerkAppearance(theme: Theme) {
       colorTextSecondary: textMuted,
       colorInputForeground: text,
       colorInputText: text,
-      colorPrimary: ACCENT,
-      colorPrimaryForeground: ACCENT_FG,
+      colorPrimary: primary,
+      colorPrimaryForeground: primaryFg,
       colorDanger: isDark ? "#f87171" : "#ef4444",
       borderRadius: "0.75rem",
       fontFamily: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
@@ -59,15 +61,15 @@ export function getClerkAppearance(theme: Theme) {
         letterSpacing: "0.04em",
       },
       formButtonPrimary: {
-        backgroundColor: ACCENT,
-        color: ACCENT_FG,
-        "&:hover": { backgroundColor: "#b89940" },
+        backgroundColor: primary,
+        color: primaryFg,
+        "&:hover": { backgroundColor: isDark ? "#b89940" : "#285f62" },
       },
       formFieldLabel: { color: textMuted },
       formFieldInput: { color: text },
       dividerText: { color: textMuted },
       footerActionText: { color: textMuted },
-      footerActionLink: { color: ACCENT },
+      footerActionLink: { color: primary },
       identityPreviewText: { color: text },
       identityPreviewEditButtonIcon: { color: textMuted },
 
@@ -112,7 +114,7 @@ export function getClerkAppearance(theme: Theme) {
       navbarButtonText: { color: "inherit" },
       navbarButton__active: {
         backgroundColor: isDark ? "#1a1a24" : "#f0f0f5",
-        color: ACCENT,
+        color: primary,
       },
       pageScrollBox: { backgroundColor: surface },
       page: { backgroundColor: surface },
@@ -122,7 +124,7 @@ export function getClerkAppearance(theme: Theme) {
       profileSectionTitleText: { color: text, fontWeight: 600 },
       profileSectionSubtitle: { color: textMuted },
       profileSectionContent: { color: text },
-      profileSectionPrimaryButton: { color: ACCENT },
+      profileSectionPrimaryButton: { color: primary },
       badge: {
         color: textMuted,
         borderColor: border,

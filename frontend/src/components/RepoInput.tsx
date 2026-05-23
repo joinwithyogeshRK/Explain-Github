@@ -37,7 +37,7 @@ export const RepoInput = ({ isIndexing, onIndex, onClose, className }: Props) =>
   return (
     <motion.div
       className={cn(
-        "flex flex-col gap-2.5 rounded-xl border border-border bg-card p-3.5 shadow-xl",
+        "glass-panel flex flex-col gap-2.5 rounded-xl border border-border p-3.5",
         className
       )}
       initial={{ opacity: 0, y: 8, scale: 0.98 }}
@@ -65,7 +65,7 @@ export const RepoInput = ({ isIndexing, onIndex, onClose, className }: Props) =>
       <div className="flex gap-2">
         <input
           className={cn(
-            "min-w-0 flex-1 rounded-lg border bg-muted/50 px-3 py-2 font-mono text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-accent/50 focus:ring-1 focus:ring-accent/30",
+            "min-w-0 flex-1 rounded-lg border bg-white/60 px-3 py-2 font-mono text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-accent/50 focus:ring-1 focus:ring-accent/30 dark:bg-muted/50",
             error ? "border-destructive/60" : "border-input"
           )}
           type="text"
@@ -84,7 +84,7 @@ export const RepoInput = ({ isIndexing, onIndex, onClose, className }: Props) =>
           onClick={handleSubmit}
           disabled={isIndexing || !url.trim()}
           className={cn(
-            "shrink-0 rounded-lg bg-accent px-4 py-2 font-mono text-[11px] font-semibold text-accent-foreground transition-opacity",
+            "shrink-0 rounded-lg bg-[linear-gradient(135deg,var(--accent),var(--brand-secondary))] px-4 py-2 font-mono text-[11px] font-semibold text-accent-foreground shadow-sm transition-opacity",
             (isIndexing || !url.trim()) && "cursor-not-allowed opacity-40"
           )}
           whileHover={!isIndexing && url.trim() ? { scale: 1.03 } : {}}

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Show, SignInButton, SignUpButton, useSignIn, useSignUp } from "@clerk/react"
 import { Loader2 } from "lucide-react"
 import { getClerkAppearance } from "@/lib/clerk-appearance"
-import { useTheme } from "@/context/ThemeProvider"
+import { useTheme } from "@/context/theme"
 import { cn } from "@/lib/utils"
 
 function GoogleMark({ className }: { className?: string }) {
@@ -74,7 +74,7 @@ function ContinueWithGoogleButton() {
         onClick={() => void handleGoogle()}
         disabled={busy || loading}
         className={cn(
-          "flex items-center justify-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 font-mono text-[9px] font-semibold tracking-wider text-foreground transition-colors hover:border-accent/40 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+          "flex items-center justify-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5 font-mono text-[9px] font-semibold tracking-wider text-foreground shadow-sm transition-colors hover:border-accent/40 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-muted"
         )}
       >
         {busy || loading ? (
@@ -95,7 +95,7 @@ function ContinueWithGoogleButton() {
 }
 
 const authBtnClass =
-  "rounded-full border border-border bg-card px-3 py-1.5 font-mono text-[9px] font-semibold tracking-wider transition-colors hover:border-accent/50"
+  "rounded-full border border-border bg-card/80 px-3 py-1.5 font-mono text-[9px] font-semibold tracking-wider shadow-sm transition-colors hover:border-accent/50 hover:bg-white dark:hover:bg-muted"
 
 export function AuthSection() {
   const { theme } = useTheme()
