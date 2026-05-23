@@ -11,9 +11,19 @@ import { useRecorder } from "../hooks/useRecorder"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3009"
 
-interface HistoryItem { q: string; a: string }
-interface Chat        { id: string; title: string; created_at: string }
-interface Document    { source: string; uploadedAt: number }
+interface HistoryItem {
+  q: string
+  a: string
+}
+interface Chat {
+  id: string
+  title: string
+  created_at: string
+}
+interface Document {
+  source: string
+  uploadedAt: number
+}
 
 const ChatPage = () => {
   const { isSignedIn, getToken } = useAuth()
@@ -30,71 +40,62 @@ const ChatPage = () => {
     return token ? { Authorization: `Bearer ${token}` } : {}
   }
 
-  // ── State ──────────────────────────────────────────────────
-  const [message,         setMessage]         = useState("")
-  const [file,            setFile]            = useState<File | null>(null)
-  const [fileName,        setFileName]        = useState("")
-  const [response,        setResponse]        = useState("")
-  const [isStreaming,     setIsStreaming]      = useState(false)
-  const [focused,         setFocused]         = useState(false)
-  const [charCount,       setCharCount]       = useState(0)
-  const [history,         setHistory]         = useState<HistoryItem[]>([])
-  const [currentQ,        setCurrentQ]        = useState("")
-  const [chatId,          setChatId]          = useState<string | null>(null)
-  const [sidebarOpen,     setSidebarOpen]     = useState(false)
-  const [chats,           setChats]           = useState<Chat[]>([])
-  const [loadingChats,    setLoadingChats]    = useState(false)
+  const [message, setMessage] = useState("")
+  const [file, setFile] = useState<File | null>(null)
+  const [fileName, setFileName] = useState("")
+  const [response, setResponse] = useState("")
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const [charCount, setCharCount] = useState(0)
+  const [history, setHistory] = useState<HistoryItem[]>([])
+  const [currentQ, setCurrentQ] = useState("")
+  const [chatId, setChatId] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [chats, setChats] = useState<Chat[]>([])
+  const [loadingChats, setLoadingChats] = useState(false)
   const [loadingMessages, setLoadingMessages] = useState(false)
-  const [documents,       setDocuments]       = useState<Document[]>([])
-  const [selectedSource,  setSelectedSource]  = useState<string>("all")
-  const [loadingDocs,     setLoadingDocs]     = useState(false)
-  const [isIndexing,      setIsIndexing]      = useState(false)
-  const [githubConnected,  setGithubConnected]  = useState(false)
-  const [githubLogin,      setGithubLogin]      = useState<string | null>(null)
-  const [loadingGitHub,    setLoadingGitHub]    = useState(false)
+  const [documents, setDocuments] = useState<Document[]>([])
+  const [selectedSource, setSelectedSource] = useState<string>("all")
+  const [loadingDocs, setLoadingDocs] = useState(false)
+  const [isIndexing, setIsIndexing] = useState(false)
+  const [githubConnected, setGithubConnected] = useState(false)
+  const [githubLogin, setGithubLogin] = useState<string | null>(null)
+  const [loadingGitHub, setLoadingGitHub] = useState(false)
+  const [connectingGithub, setConnectingGithub] = useState(false)
 
-  // ── Refs ───────────────────────────────────────────────────
   const currentResponseRef = useRef("")
-  const streamRef          = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const scrollRef          = useRef<HTMLDivElement | null>(null)
-  const inputRef           = useRef<HTMLInputElement | null>(null)
+  const streamRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLTextAreaElement | null>(null)
 
-  // ── Auto scroll ────────────────────────────────────────────
   useEffect(() => {
     if (scrollRef.current)
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [response, history, isStreaming])
 
-  // ── Fetch chats when sidebar opens ─────────────────────────
   useEffect(() => {
     if (sidebarOpen && signedIn) void fetchChats()
   }, [sidebarOpen, signedIn])
 
-  // ── Fetch documents on mount ────────────────────────────────
   useEffect(() => {
     if (signedIn) void fetchDocuments()
   }, [signedIn])
 
-  // ── Fetch GitHub status when signed in ──────────────────────
   useEffect(() => {
     if (signedIn) void fetchGithubStatus()
   }, [signedIn])
 
-  // ── Handle github=connected redirect ─────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("github") === "connected") {
+      window.history.replaceState({}, "", window.location.pathname)
+      void fetchGithubStatus()
+    }
+    if (params.get("github_error")) {
+      window.history.replaceState({}, "", window.location.pathname)
+    }
+  }, [])
 
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search)
-  if (params.get("github") === "connected") {
-    // clean URL
-    window.history.replaceState({}, "", window.location.pathname)
-    // refresh status
-    void fetchGithubStatus()
-  }
-  if (params.get("github_error")) {
-    window.history.replaceState({}, "", window.location.pathname)
-  }
-}, [])
-  // ── API calls ──────────────────────────────────────────────
   const fetchChats = async () => {
     if (!signedIn) return
     setLoadingChats(true)
@@ -103,8 +104,11 @@ useEffect(() => {
         headers: await authHeaders(),
       })
       setChats(res.data.chats ?? [])
-    } catch { setChats([]) }
-    finally  { setLoadingChats(false) }
+    } catch {
+      setChats([])
+    } finally {
+      setLoadingChats(false)
+    }
   }
 
   const fetchDocuments = async () => {
@@ -115,28 +119,36 @@ useEffect(() => {
         headers: await authHeaders(),
       })
       setDocuments(res.data.documents ?? [])
-    } catch { setDocuments([]) }
-    finally  { setLoadingDocs(false) }
+    } catch {
+      setDocuments([])
+    } finally {
+      setLoadingDocs(false)
+    }
   }
 
   const loadChat = async (selectedChatId: string) => {
     if (isStreaming) stopStreaming()
     setLoadingMessages(true)
     try {
-      const res = await axios.get(
-        `${API}/history/messages/${selectedChatId}`,
-        { headers: await authHeaders() }
-      )
+      const res = await axios.get(`${API}/history/messages/${selectedChatId}`, {
+        headers: await authHeaders(),
+      })
       setHistory(
         (res.data.messages ?? []).map(
           (m: { query: string; answer: string }) => ({ q: m.query, a: m.answer })
         )
       )
       setChatId(selectedChatId)
-      setFile(null); setFileName(""); setMessage(""); setCharCount(0)
+      setFile(null)
+      setFileName("")
+      setMessage("")
+      setCharCount(0)
       setSidebarOpen(false)
-    } catch {}
-    finally { setLoadingMessages(false) }
+    } catch {
+      /* ignore */
+    } finally {
+      setLoadingMessages(false)
+    }
   }
 
   const deleteChat = async (id: string, e: React.MouseEvent) => {
@@ -147,28 +159,24 @@ useEffect(() => {
       })
       setChats((prev) => prev.filter((c) => c.id !== id))
       if (chatId === id) handleNewChat()
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
-  // ── Delete a document / repo source ────────────────────────
-  // Called by InputBar when user confirms deletion in the modal.
-  // Removes the source from Pinecone (vectors) + Supabase (rows),
-  // then updates local state so the pill disappears immediately.
   const handleDeleteSource = async (source: string) => {
     try {
       await axios.delete(`${API}/documents/delete`, {
         headers: { ...(await authHeaders()), "Content-Type": "application/json" },
-        data:    { source },
+        data: { source },
       })
-      // Optimistically remove from local state
       setDocuments((prev) => prev.filter((d) => d.source !== source))
     } catch (err) {
       console.error("Delete source failed:", err)
-      // Re-throw so the modal can show a deleting→error state if needed
       throw err
     }
   }
-  // ── Fetch GitHub status ──────────────────────────────────────
+
   const fetchGithubStatus = async () => {
     setLoadingGitHub(true)
     try {
@@ -184,7 +192,6 @@ useEffect(() => {
     }
   }
 
-  // ── GitHub repo indexing ────────────────────────────────────
   const handleIndexRepo = async (repoUrl: string) => {
     if (!signedIn || isIndexing) return
     setIsIndexing(true)
@@ -203,22 +210,22 @@ useEffect(() => {
 
       typewriterStream(
         `✅ Repository indexed successfully!\n\n` +
-        `**${repoName}** is ready to explore.\n` +
-        `— ${fileCount} files indexed\n` +
-        `— ${chunkCount} chunks stored\n\n` +
-        `You can now ask anything about this codebase.`,
+          `**${repoName}** is ready to explore.\n` +
+          `— ${fileCount} files indexed\n` +
+          `— ${chunkCount} chunks stored\n\n` +
+          `You can now ask anything about this codebase.`,
         `Index ${repoName}`
       )
-
     } catch (err: unknown) {
       let errorMsg = "Failed to index repository. Please try again."
 
       if (axios.isAxiosError(err)) {
-        const status  = err.response?.status
+        const status = err.response?.status
         const bodyErr = err.response?.data?.error
 
         if (status === 404) {
-          errorMsg = "Repository not found. Make sure it's public and the URL is correct."
+          errorMsg =
+            "Repository not found. Make sure it's public and the URL is correct."
         } else if (status === 429) {
           errorMsg = "GitHub API rate limit hit. Please wait an hour and try again."
         } else if (status === 422) {
@@ -234,7 +241,6 @@ useEffect(() => {
     }
   }
 
-  // ── Streaming ───────────────────────────────────────────────
   const stopStreaming = () => {
     if (streamRef.current) clearTimeout(streamRef.current)
     if (currentResponseRef.current && currentQ)
@@ -273,25 +279,36 @@ useEffect(() => {
     type()
   }
 
-  // ── Handlers ────────────────────────────────────────────────
   const handleNewChat = () => {
     if (isStreaming) stopStreaming()
-    setChatId(null); setHistory([]);    setMessage(""); setCharCount(0)
-    setFile(null);   setFileName("");   setResponse("")
-    currentResponseRef.current = "";   setCurrentQ("")
+    setChatId(null)
+    setHistory([])
+    setMessage("")
+    setCharCount(0)
+    setFile(null)
+    setFileName("")
+    setResponse("")
+    currentResponseRef.current = ""
+    setCurrentQ("")
     setSelectedSource("all")
     if (signedIn) setTimeout(() => inputRef.current?.focus(), 100)
   }
 
-  // ── GitHub OAuth ──────────────────────────────────────────────
   const handleConnectGithub = async () => {
+    if (connectingGithub) return
+    setConnectingGithub(true)
     try {
       const res = await axios.get(`${API}/auth/github/start`, {
         headers: await authHeaders(),
       })
-      window.location.href = res.data.url
+      if (res.data?.url) {
+        window.location.href = res.data.url
+        return
+      }
+      setConnectingGithub(false)
     } catch {
       console.error("Failed to start GitHub OAuth")
+      setConnectingGithub(false)
     }
   }
 
@@ -299,20 +316,27 @@ useEffect(() => {
     if (!signedIn) return
     const f = e.target.files?.[0]
     if (!f) return
-    if (f.type !== "application/pdf") { alert("Only PDF files are allowed"); return }
-    setFile(f); setFileName(f.name)
+    if (f.type !== "application/pdf") {
+      alert("Only PDF files are allowed")
+      return
+    }
+    setFile(f)
+    setFileName(f.name)
   }
 
   const handleSend = async () => {
     if (!signedIn || !message.trim() || isStreaming) return
-    const q  = message.trim()
+    const q = message.trim()
     const fd = new FormData()
     if (file) fd.append("File", file)
     fd.append("query", q)
     if (chatId) fd.append("chatId", chatId)
     if (selectedSource !== "all") fd.append("filterSource", selectedSource)
 
-    setMessage(""); setCharCount(0); setFile(null); setFileName("")
+    setMessage("")
+    setCharCount(0)
+    setFile(null)
+    setFileName("")
     setIsStreaming(true)
 
     try {
@@ -331,12 +355,13 @@ useEffect(() => {
     } catch (err: unknown) {
       let errorMsg = "Something went wrong. Please try again."
       if (axios.isAxiosError(err)) {
-        const status  = err.response?.status
+        const status = err.response?.status
         const bodyErr = err.response?.data?.error
         if (status !== undefined && status >= 500) {
           errorMsg = "Something went wrong on our end. Please try again in a moment."
         } else if (
-          typeof bodyErr === "string" && bodyErr &&
+          typeof bodyErr === "string" &&
+          bodyErr &&
           !/_KEY|SECRET|TOKEN|password|environment variable/i.test(bodyErr)
         ) {
           errorMsg = bodyErr
@@ -348,7 +373,7 @@ useEffect(() => {
   }
 
   return (
-    <div style={s.root}>
+    <div className="relative flex h-screen w-screen overflow-hidden bg-background text-foreground">
       <Background />
 
       <Sidebar
@@ -362,23 +387,30 @@ useEffect(() => {
         onDeleteChat={deleteChat}
       />
 
-      <div style={s.shell}>
+      <div className="relative z-[1] mx-auto flex h-full w-full max-w-[900px] flex-col px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 box-border sm:px-5 sm:pb-5 sm:pt-6">
         <Header
           chatId={chatId}
           file={file}
           fileName={fileName}
-          onRemoveFile={() => { setFile(null); setFileName("") }}
+          onRemoveFile={() => {
+            setFile(null)
+            setFileName("")
+          }}
           onNewChat={handleNewChat}
           onOpenSidebar={() => setSidebarOpen(true)}
         />
 
         <AnimatePresence>
           {loadingMessages && (
-            <motion.div style={s.loadingBar}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            <motion.div
+              className="relative mb-1 h-0.5 shrink-0 overflow-hidden rounded-full bg-muted"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <motion.div style={s.loadingBarFill}
-                animate={{ x: ["-100%", "100%"] }}
+              <motion.div
+                className="absolute inset-y-0 w-2/5 bg-gradient-to-r from-transparent via-accent to-transparent"
+                animate={{ x: ["-100%", "250%"] }}
                 transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
               />
             </motion.div>
@@ -412,41 +444,32 @@ useEffect(() => {
           recError={recError}
           isIndexing={isIndexing}
           onSourceChange={setSelectedSource}
-          onChange={(val) => { setMessage(val); setCharCount(val.length) }}
+          onChange={(val) => {
+            setMessage(val)
+            setCharCount(val.length)
+          }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onSend={handleSend}
           onStop={stopStreaming}
           onFileChange={handleFileChange}
-          onRemoveFile={() => { setFile(null); setFileName("") }}
+          onRemoveFile={() => {
+            setFile(null)
+            setFileName("")
+          }}
           onRecordStart={startRecording}
           onRecordStop={stopRecording}
           onIndexRepo={handleIndexRepo}
-          onDeleteSource={handleDeleteSource}  
+          onDeleteSource={handleDeleteSource}
           githubConnected={githubConnected}
           githubLogin={githubLogin}
           loadingGitHub={loadingGitHub}
+          connectingGithub={connectingGithub}
           onConnectGithub={handleConnectGithub}
-
         />
       </div>
     </div>
   )
-}
-
-const s: Record<string, React.CSSProperties> = {
-  root: {
-    width: "100vw", height: "100vh", background: "#08080a", overflow: "hidden",
-    fontFamily: "'DM Mono','Fira Mono','Courier New',monospace",
-    color: "#e2e2ec", position: "relative", display: "flex",
-  },
-  shell: {
-    position: "relative", zIndex: 1, display: "flex", flexDirection: "column",
-    width: "100%", height: "100%", maxWidth: "900px", margin: "0 auto",
-    padding: "24px 20px 20px", boxSizing: "border-box",
-  },
-  loadingBar:     { height: "2px", background: "#1a1a24", overflow: "hidden", flexShrink: 0, position: "relative" },
-  loadingBarFill: { position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent, #c9a84c, transparent)", width: "40%" },
 }
 
 export default ChatPage

@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+}
+
+:root {
+  --background: #f8f8fa;
+  --foreground: #12121a;
+  --card: #ffffff;
+  --card-foreground: #12121a;
+  --muted: #f0f0f5;
+  --muted-foreground: #6b6b7a;
+  --border: #e4e4ec;
+  --input: #e4e4ec;
+  --ring: #c9a84c;
+  --accent: #c9a84c;
+  --accent-foreground: #1a1408;
+  --destructive: #ef4444;
+  --success: #16a34a;
+  --orb-a: #c9a84c18;
+  --orb-b: #6366f114;
+  --grid-stroke: #c9a84c14;
+}
+
+.dark {
+  --background: #08080a;
+  --foreground: #e8e8f0;
+  --card: #0f0f14;
+  --card-foreground: #e8e8f0;
+  --muted: #14141c;
+  --muted-foreground: #6b6b7a;
+  --border: #1e1e2a;
+  --input: #1a1a28;
+  --ring: #c9a84c;
+  --accent: #c9a84c;
+  --accent-foreground: #08080a;
+  --destructive: #f87171;
+  --success: #4ade80;
+  --orb-a: #c9a84c14;
+  --orb-b: #3a2a6014;
+  --grid-stroke: #c9a84c12;
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+/* Clerk portals render on document.body — ensure readable text in dark mode */
+.dark .cl-modalContent,
+.dark .cl-userButtonPopoverCard,
+.dark .cl-navbar,
+.dark .cl-pageScrollBox {
+  color: #e8e8f0;
+}
+
+.dark .cl-userPreviewMainIdentifier,
+.dark .cl-userButtonPopoverActionButton,
+.dark .cl-userButtonPopoverActionButtonText,
+.dark .cl-profileSectionTitleText,
+.dark .cl-headerTitle,
+.dark .cl-menuButton,
+.dark .cl-tableCell {
+  color: #e8e8f0 !important;
+}
+
+.dark .cl-userPreviewSecondaryIdentifier,
+.dark .cl-userButtonPopoverActionButtonIcon,
+.dark .cl-profileSectionSubtitle,
+.dark .cl-headerSubtitle,
+.dark .cl-navbarButton,
+.dark .cl-badge,
+.dark .cl-tableHead {
+  color: #a8a8bc !important;
+}
+
+.dark .cl-navbarButton[data-active="true"],
+.dark .cl-navbarButton__active {
+  color: #c9a84c !important;
+}
