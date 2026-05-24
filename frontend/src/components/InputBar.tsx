@@ -61,7 +61,7 @@ interface Props {
 }
 
 const toolbarBtn =
-  "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:h-9 sm:w-9"
+  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:h-9 sm:w-9"
 
 function useAutoResizeTextarea(minHeight: number, maxHeight = 200) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -280,7 +280,7 @@ export const InputBar = ({
   const githubHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const githubAnchorRef = useRef<HTMLDivElement>(null)
 
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea(52, 160)
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea(isMobile ? 44 : 52, isMobile ? 128 : 160)
 
   useEffect(() => {
     if (inputRef && textareaRef.current) {
@@ -428,7 +428,7 @@ export const InputBar = ({
 
   return (
     <motion.div
-      className="flex shrink-0 flex-col gap-2"
+      className="flex shrink-0 flex-col gap-1.5 sm:gap-2"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
@@ -473,7 +473,7 @@ export const InputBar = ({
       <AnimatePresence>
         {signedIn && hasDocs && (
           <motion.div
-            className="glass-panel flex min-h-[34px] items-center gap-2 rounded-xl border border-border/80 px-2.5 py-1.5 shadow-none"
+            className="glass-panel flex min-h-[32px] items-center gap-1.5 rounded-xl border border-border/80 px-2 py-1.5 shadow-none sm:min-h-[34px] sm:gap-2 sm:px-2.5"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
@@ -538,7 +538,7 @@ export const InputBar = ({
 
       <div
         className={cn(
-          "glass-panel relative overflow-visible rounded-2xl border transition-shadow",
+          "glass-panel relative overflow-visible rounded-xl border transition-shadow sm:rounded-2xl",
           ringClass,
           !signedIn && "opacity-75"
         )}
@@ -559,7 +559,7 @@ export const InputBar = ({
             disabled={!signedIn || isTranscribing || isIndexing}
             rows={1}
             className={cn(
-              "min-h-[52px] w-full resize-none border-0 bg-transparent px-4 py-3.5 text-sm text-foreground shadow-none",
+              "min-h-[44px] w-full resize-none border-0 bg-transparent px-3 py-3 text-[13px] leading-relaxed text-foreground shadow-none sm:min-h-[52px] sm:px-4 sm:py-3.5 sm:text-sm",
               "placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0",
               !signedIn && "cursor-not-allowed"
             )}
@@ -567,7 +567,7 @@ export const InputBar = ({
           />
         </div>
 
-        <div className="flex items-center justify-between gap-1 border-t border-border/80 bg-white/25 px-2 py-2 dark:bg-white/[0.02] sm:gap-2 sm:px-3 sm:py-2.5">
+        <div className="flex items-center justify-between gap-1 border-t border-border/80 bg-white/25 px-1.5 py-1.5 dark:bg-white/[0.02] sm:gap-2 sm:px-3 sm:py-2.5">
           <div className="flex items-center gap-1 sm:gap-1.5">
             <AnimatePresence mode="wait">
               {!file ? (
@@ -646,7 +646,7 @@ export const InputBar = ({
                     <GithubIcon className="h-4 w-4" />
                   )}
                   {githubConnected && githubLogin && !isMobile && (
-                    <span className="hidden max-w-[72px] truncate text-[10px] font-mono lg:inline">
+                    <span className="hidden max-w-[72px] truncate font-mono text-[10px] xl:inline">
                       {githubLogin}
                     </span>
                   )}
@@ -671,7 +671,7 @@ export const InputBar = ({
                       className={cn(
                         "z-[70]",
                         isMobile
-                          ? "fixed inset-x-3 bottom-[calc(max(1rem,env(safe-area-inset-bottom))+5.5rem)]"
+                          ? "fixed inset-x-2.5 bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))+5rem)]"
                           : "absolute bottom-full left-0 mb-2 w-[min(calc(100vw-1.5rem),380px)]"
                       )}
                       initial={{ opacity: 0, y: isMobile ? 12 : 8 }}
@@ -808,7 +808,7 @@ export const InputBar = ({
         )}
       </div>
 
-      <p className="hidden text-center font-mono text-[10px] text-muted-foreground/70 sm:block">
+      <p className="hidden text-center font-mono text-[10px] text-muted-foreground/70 md:block">
         <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-[9px]">
           ↵
         </kbd>{" "}

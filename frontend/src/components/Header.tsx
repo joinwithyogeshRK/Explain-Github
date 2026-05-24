@@ -17,7 +17,7 @@ interface Props {
 }
 
 const iconBtn =
-  "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card/80 text-muted-foreground shadow-sm transition-colors hover:border-accent/50 hover:bg-white hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 dark:hover:bg-muted sm:h-9 sm:w-9"
+  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card/80 text-muted-foreground shadow-sm transition-colors hover:border-accent/50 hover:bg-white hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 dark:hover:bg-muted sm:h-9 sm:w-9"
 
 export const Header = ({
   chatId,
@@ -32,13 +32,13 @@ export const Header = ({
 
   return (
     <motion.header
-      className="mb-3 flex shrink-0 flex-col gap-3 px-3 py-3 sm:mb-5 sm:px-4 sm:py-3.5"
+      className="mb-1.5 flex shrink-0 flex-col gap-2 px-1 py-1.5 sm:mb-3 sm:gap-3 sm:px-2 sm:py-2.5 lg:mb-4 lg:px-3 lg:py-3"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3.5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <motion.button
             type="button"
             onClick={onOpenSidebar}
@@ -49,27 +49,27 @@ export const Header = ({
             <Menu className="h-4 w-4" />
           </motion.button>
 
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center sm:h-10 sm:w-10">
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
+            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center sm:h-9 sm:w-9 lg:h-10 lg:w-10">
               <motion.div
                 className="absolute inset-0 rounded-full border border-transparent border-t-accent border-r-[color:var(--brand-secondary)]/50"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
               />
-              <div className="h-4 w-4 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--brand-secondary))] shadow-[0_0_18px_color-mix(in_srgb,var(--accent)_32%,transparent)] sm:h-[18px] sm:w-[18px]" />
+              <div className="h-3.5 w-3.5 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--brand-secondary))] shadow-[0_0_18px_color-mix(in_srgb,var(--accent)_32%,transparent)] sm:h-4 sm:w-4 lg:h-[18px] lg:w-[18px]" />
             </div>
             <div className="min-w-0">
-              <div className="truncate text-xs font-bold tracking-[0.2em] text-accent sm:text-sm sm:tracking-[0.28em]">
+              <div className="truncate text-[11px] font-bold tracking-[0.2em] text-accent sm:text-xs sm:tracking-[0.24em] lg:text-sm lg:tracking-[0.28em]">
                 ORACLE
               </div>
-              <div className="hidden truncate text-[9px] tracking-[0.14em] text-muted-foreground sm:mt-0.5 md:block">
+              <div className="hidden truncate text-[8px] tracking-[0.12em] text-muted-foreground sm:mt-0.5 md:block lg:text-[9px] lg:tracking-[0.14em]">
                 RAG Intelligence Engine
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 lg:gap-2">
           <motion.button
             type="button"
             onClick={onNewChat}
@@ -81,7 +81,7 @@ export const Header = ({
             <Plus className="h-4 w-4" />
           </motion.button>
 
-          <ThemeToggle className="h-10 w-10 sm:h-9 sm:w-9" />
+          <ThemeToggle className="h-9 w-9" />
 
           <Show when="signed-in">
             <GithubOAuth />
@@ -98,7 +98,7 @@ export const Header = ({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           {chatId && (
             <span className="rounded-full border border-accent/25 bg-accent/10 px-2 py-0.5 font-mono text-[9px] tracking-wider text-accent/80 shadow-sm sm:px-2.5 sm:py-1 sm:text-[10px]">
@@ -122,7 +122,7 @@ export const Header = ({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1.5 sm:gap-2">
           <AuthSection />
         </div>
       </div>

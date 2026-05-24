@@ -74,7 +74,7 @@ function ContinueWithGoogleButton() {
         onClick={() => void handleGoogle()}
         disabled={busy || loading}
         className={cn(
-          "flex items-center justify-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5 font-mono text-[9px] font-semibold tracking-wider text-foreground shadow-sm transition-colors hover:border-accent/40 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-muted"
+          "flex h-8 items-center justify-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 font-mono text-[9px] font-semibold tracking-wider text-foreground shadow-sm transition-colors hover:border-accent/40 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-muted sm:h-8 sm:gap-2 sm:px-3"
         )}
       >
         {busy || loading ? (
@@ -95,7 +95,7 @@ function ContinueWithGoogleButton() {
 }
 
 const authBtnClass =
-  "rounded-full border border-border bg-card/80 px-3 py-1.5 font-mono text-[9px] font-semibold tracking-wider shadow-sm transition-colors hover:border-accent/50 hover:bg-white dark:hover:bg-muted"
+  "h-8 rounded-full border border-border bg-card/80 px-2.5 font-mono text-[9px] font-semibold tracking-wider shadow-sm transition-colors hover:border-accent/50 hover:bg-white dark:hover:bg-muted sm:px-3"
 
 export function AuthSection() {
   const { theme } = useTheme()
@@ -103,12 +103,11 @@ export function AuthSection() {
 
   return (
     <Show when="signed-out">
-      <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-1.5">
         <ContinueWithGoogleButton />
         <SignInButton mode="modal" appearance={appearance}>
           <button type="button" className={cn(authBtnClass, "text-accent")}>
-            <span className="hidden sm:inline">Sign in</span>
-            <span className="sm:hidden">In</span>
+            <span>Sign in</span>
           </button>
         </SignInButton>
         <SignUpButton mode="modal" appearance={appearance}>
@@ -116,8 +115,7 @@ export function AuthSection() {
             type="button"
             className={cn(authBtnClass, "text-muted-foreground hover:text-foreground")}
           >
-            <span className="hidden sm:inline">Sign up</span>
-            <span className="sm:hidden">Up</span>
+            <span>Sign up</span>
           </button>
         </SignUpButton>
       </div>

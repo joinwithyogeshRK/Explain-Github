@@ -381,18 +381,18 @@ export const MessageList = ({
   return (
     <div
       ref={scrollRef}
-      className="scrollbar-thin flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden px-1 py-3 sm:gap-8 sm:px-2"
+      className="scrollbar-thin flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overflow-x-hidden px-1 py-2 sm:gap-7 sm:px-2 sm:py-3"
     >
       <AnimatePresence>
         {isEmpty && (
           <motion.div
-            className="flex flex-1 flex-col items-center justify-center gap-5 px-3 py-8 text-center sm:gap-6 sm:px-5 sm:py-14"
+            className="empty-state-shell flex flex-1 flex-col items-center gap-4 px-2 text-center sm:gap-5 sm:px-5 lg:gap-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl border border-border bg-card/80 shadow-[var(--shadow-float)] sm:h-20 sm:w-20">
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-card/80 shadow-[var(--shadow-float)] sm:h-16 sm:w-16 lg:h-20 lg:w-20 lg:rounded-3xl">
               <motion.div
                 className="absolute inset-2 rounded-2xl border border-transparent border-t-accent/40 border-r-[color:var(--brand-secondary)]/40"
                 animate={{ rotate: 360 }}
@@ -403,35 +403,35 @@ export const MessageList = ({
                 animate={{ rotate: -360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
               />
-              <Search className="h-6 w-6 text-accent sm:h-7 sm:w-7" strokeWidth={1.5} />
+              <Search className="h-5 w-5 text-accent sm:h-6 sm:w-6 lg:h-7 lg:w-7" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="text-xl font-semibold tracking-wide text-foreground sm:text-2xl">
+              <h2 className="text-lg font-semibold text-foreground sm:text-xl lg:text-2xl">
                 Begin your inquiry
               </h2>
-              <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
+              <p className="mx-auto mt-1.5 max-w-[34rem] text-xs leading-relaxed text-muted-foreground sm:text-sm">
                 Upload a PDF, use voice, or index a GitHub repo — then ask Oracle anything
                 about your sources.
               </p>
             </div>
-            <div className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid w-full max-w-[46rem] grid-cols-1 gap-2.5 min-[560px]:grid-cols-3 sm:gap-3">
               {CAPABILITIES.map((cap) => {
                 const Icon = cap.icon
                 return (
                   <div
                     key={cap.title}
-                    className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card/80 p-4 text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-[var(--shadow-float)] sm:items-start"
+                    className="group flex min-h-[112px] flex-row items-start gap-3 rounded-xl border border-border bg-card/80 p-3 text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-[var(--shadow-float)] min-[560px]:min-h-[132px] min-[560px]:flex-col min-[560px]:gap-2 lg:p-4"
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10 sm:h-9 sm:w-9 sm:rounded-xl">
                       {cap.github ? (
-                        <Icon className="h-4 w-4" />
+                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       ) : (
-                        <Icon className="h-4 w-4" strokeWidth={1.75} />
+                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={1.75} />
                       )}
                     </div>
                     <div>
                       <h3 className="text-xs font-semibold text-foreground">{cap.title}</h3>
-                      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground min-[560px]:text-[10.5px] lg:text-[11px]">
                         {cap.description}
                       </p>
                     </div>

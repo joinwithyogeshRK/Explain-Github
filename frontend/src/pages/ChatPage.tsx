@@ -488,7 +488,7 @@ const ChatPage = () => {
     "U"
 
   return (
-    <div className="relative flex h-screen w-screen overflow-hidden bg-background text-foreground">
+    <div className="relative flex h-[100dvh] min-h-[560px] w-screen overflow-hidden bg-background text-foreground">
       <Background />
 
       {!chatStarted && (
@@ -538,8 +538,8 @@ const ChatPage = () => {
         <main
           className={
             chatStarted
-              ? "mx-auto flex h-full min-w-0 flex-1 flex-col px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 box-border sm:px-5 sm:pb-4 sm:pt-4"
-              : "mx-auto flex h-full w-full max-w-[980px] flex-col px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 box-border sm:px-5 sm:pb-5 sm:pt-6 lg:px-7"
+              ? "mx-auto box-border flex h-full min-w-0 flex-1 flex-col px-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2.5 sm:px-4 sm:pb-3 sm:pt-3 lg:px-5 lg:pb-4 lg:pt-4"
+              : "mx-auto box-border flex h-full w-full max-w-[1080px] flex-col px-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2.5 sm:px-4 sm:pb-4 sm:pt-4 lg:px-6 lg:pb-5 lg:pt-5"
           }
         >
         {!chatStarted ? (
@@ -555,24 +555,24 @@ const ChatPage = () => {
             onOpenSidebar={() => setSidebarOpen(true)}
           />
         ) : (
-          <div className="mb-2 flex h-12 shrink-0 items-center justify-between border-b border-border/70 px-1 sm:mb-3 sm:h-14 sm:px-2">
+          <div className="mb-1.5 flex h-11 shrink-0 items-center justify-between border-b border-border/70 px-0.5 sm:mb-2 sm:h-12 sm:px-1.5 lg:mb-3 lg:h-14 lg:px-2">
             <div className="flex min-w-0 items-center gap-2">
               {(!workspaceSidebarOpen || isMobile) && (
                 <button
                   type="button"
                   onClick={() => setWorkspaceSidebarOpen(true)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card/70 text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card/70 text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
                   aria-label="Show all chats"
                   title="Show all chats"
                 >
-                  <PanelLeft className="h-4 w-4" />
+                  <PanelLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               )}
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold text-foreground">
+                <div className="truncate text-[13px] font-semibold text-foreground sm:text-sm">
                   Oracle Chat
                 </div>
-                <div className="font-mono text-[9px] tracking-[0.18em] text-muted-foreground">
+                <div className="font-mono text-[8px] tracking-[0.16em] text-muted-foreground sm:text-[9px] sm:tracking-[0.18em]">
                   {chatId ? `#${chatId.slice(0, 8)}` : "ACTIVE SESSION"}
                 </div>
               </div>
@@ -582,17 +582,17 @@ const ChatPage = () => {
               <button
                 type="button"
                 onClick={handleNewChat}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card/70 text-muted-foreground shadow-sm transition-colors hover:border-accent/40 hover:bg-muted hover:text-accent"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card/70 text-muted-foreground shadow-sm transition-colors hover:border-accent/40 hover:bg-muted hover:text-accent sm:h-9 sm:w-9"
                 aria-label="New chat"
                 title="New chat"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
               <div ref={profileMenuRef} className="relative">
                 <button
                   type="button"
                   onClick={() => setProfileMenuOpen((open) => !open)}
-                  className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-card/80 text-sm font-semibold text-accent shadow-sm transition-colors hover:border-accent/40 hover:bg-muted"
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-border bg-card/80 text-xs font-semibold text-accent shadow-sm transition-colors hover:border-accent/40 hover:bg-muted sm:h-9 sm:w-9 sm:text-sm"
                   aria-label="Open profile menu"
                   aria-expanded={profileMenuOpen}
                   title="Profile"
