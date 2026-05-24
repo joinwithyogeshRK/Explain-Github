@@ -1,5 +1,5 @@
 // frontend/src/hooks/useRecorder.ts
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 
 const API_BASE = import.meta.env.VITE_API_URL as string;
 
@@ -18,9 +18,33 @@ export function useRecorder({ onTranscript, getToken }: UseRecorderOptions) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef        = useRef<Blob[]>([]);
   const streamRef        = useRef<MediaStream | null>(null);
+  const errorTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearRecorderError = useCallback(() => {
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+    setRecError(null);
+  }, []);
+
+  const showRecorderError = useCallback((message: string) => {
+    if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+    setRecError(message);
+    errorTimerRef.current = setTimeout(() => {
+      setRecError(null);
+      errorTimerRef.current = null;
+    }, 5000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+    };
+  }, []);
 
   const startRecording = useCallback(async () => {
-    setRecError(null);
+    clearRecorderError();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -68,7 +92,7 @@ export function useRecorder({ onTranscript, getToken }: UseRecorderOptions) {
           onTranscript(text);
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Transcription failed";
-          setRecError(msg);
+          showRecorderError(msg);
           console.error("[useRecorder]", err);
         } finally {
           setIsTranscribing(false);
@@ -80,11 +104,15 @@ export function useRecorder({ onTranscript, getToken }: UseRecorderOptions) {
       setIsRecording(true);
     } catch (err) {
       const msg =
-        err instanceof Error ? err.message : "Microphone access denied";
-      setRecError(msg);
+        err instanceof DOMException && err.name === "NotAllowedError"
+          ? "Microphone permission denied. Click the mic to try again."
+          : err instanceof Error
+            ? err.message
+            : "Microphone access denied";
+      showRecorderError(msg);
       console.error("[useRecorder]", err);
     }
-  }, [onTranscript, getToken]);
+  }, [clearRecorderError, onTranscript, getToken, showRecorderError]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === "recording") {
@@ -93,5 +121,12 @@ export function useRecorder({ onTranscript, getToken }: UseRecorderOptions) {
     setIsRecording(false);
   }, []);
 
-  return { isRecording, isTranscribing, recError, startRecording, stopRecording };
+  return {
+    isRecording,
+    isTranscribing,
+    recError,
+    startRecording,
+    stopRecording,
+    clearRecorderError,
+  };
 }

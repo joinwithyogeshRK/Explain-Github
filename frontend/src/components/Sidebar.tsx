@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion"
-import { Check, MessageSquare, MoreHorizontal, PanelLeftClose, Pencil, Plus, Trash2, X } from "lucide-react"
-import { useState } from "react"
+import { Check, MessageSquare, MoreHorizontal, PanelLeftClose, Pencil, Plus, Search, Trash2, X } from "lucide-react"
+import { useMemo, useState } from "react"
 import { cn } from "@/lib/utils"
 
 interface Chat {
@@ -46,6 +46,20 @@ export const Sidebar = ({
   const [draftTitle, setDraftTitle] = useState("")
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredChats = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return chats
+
+    return chats.filter((chat) => {
+      const date = formatDate(chat.created_at).toLowerCase()
+      return (
+        chat.title.toLowerCase().includes(query) ||
+        date.includes(query)
+      )
+    })
+  }, [chats, searchQuery])
 
   const beginRename = (chat: Chat, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -122,6 +136,28 @@ export const Sidebar = ({
             NEW CHAT
           </button>
 
+          <div className="mx-3 mt-3 flex h-10 items-center gap-2 rounded-xl border border-border bg-card/65 px-3 text-muted-foreground shadow-sm transition-colors focus-within:border-accent/35 focus-within:bg-background">
+            <Search className="h-3.5 w-3.5 shrink-0" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter chats..."
+              className="min-w-0 flex-1 bg-transparent text-[12px] font-semibold text-foreground outline-none placeholder:text-muted-foreground/65"
+              aria-label="Filter chats"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+                aria-label="Clear chat filter"
+                title="Clear filter"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
           <div className="mx-3 my-3 h-px bg-border" />
 
           <div className="scrollbar-thin flex-1 overflow-y-auto px-2 pb-4">
@@ -140,8 +176,12 @@ export const Sidebar = ({
               <p className="px-4 py-8 text-center text-xs text-muted-foreground">
                 No previous chats
               </p>
+            ) : filteredChats.length === 0 ? (
+              <p className="px-4 py-8 text-center text-xs text-muted-foreground">
+                No chats match your filter
+              </p>
             ) : (
-              chats.map((chat) => (
+              filteredChats.map((chat) => (
                 <motion.div
                   key={chat.id}
                   role="button"
