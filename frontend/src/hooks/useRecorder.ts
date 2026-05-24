@@ -2,6 +2,8 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 
 const API_BASE = import.meta.env.VITE_API_URL as string;
+const MIC_BLOCKED_MESSAGE =
+  "Microphone is blocked. Enable it from the browser site settings, then click the mic again.";
 
 interface UseRecorderOptions {
   /** Called with the transcript text when AssemblyAI finishes */
@@ -28,13 +30,13 @@ export function useRecorder({ onTranscript, getToken }: UseRecorderOptions) {
     setRecError(null);
   }, []);
 
-  const showRecorderError = useCallback((message: string) => {
+  const showRecorderError = useCallback((message: string, duration = 5000) => {
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
     setRecError(message);
     errorTimerRef.current = setTimeout(() => {
       setRecError(null);
       errorTimerRef.current = null;
-    }, 5000);
+    }, duration);
   }, []);
 
   useEffect(() => {
@@ -46,6 +48,15 @@ export function useRecorder({ onTranscript, getToken }: UseRecorderOptions) {
   const startRecording = useCallback(async () => {
     clearRecorderError();
     try {
+      const permission = await navigator.permissions
+        ?.query({ name: "microphone" as PermissionName })
+        .catch(() => null);
+
+      if (permission?.state === "denied") {
+        showRecorderError(MIC_BLOCKED_MESSAGE, 9000);
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
@@ -105,11 +116,11 @@ export function useRecorder({ onTranscript, getToken }: UseRecorderOptions) {
     } catch (err) {
       const msg =
         err instanceof DOMException && err.name === "NotAllowedError"
-          ? "Microphone permission denied. Click the mic to try again."
+          ? MIC_BLOCKED_MESSAGE
           : err instanceof Error
             ? err.message
             : "Microphone access denied";
-      showRecorderError(msg);
+      showRecorderError(msg, msg === MIC_BLOCKED_MESSAGE ? 9000 : 5000);
       console.error("[useRecorder]", err);
     }
   }, [clearRecorderError, onTranscript, getToken, showRecorderError]);
