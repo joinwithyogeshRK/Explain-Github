@@ -103,7 +103,13 @@ export const askGroq = async (
     ? `${baseVoice}
 
 You are explaining the GitHub repository "${repoContext.repoName}".
-${repoContext.broadQuery ? "The user is asking a broad repository question. Cover the verified end-to-end flow across the available files before discussing optional improvements." : ""}
+${repoContext.broadQuery ? `The user is asking a broad repository question. Explain the verified architecture end to end before discussing optional improvements.
+When the available code supports them, distinguish:
+1. repository indexing and ingestion,
+2. query expansion and embedding,
+3. retrieval and reranking,
+4. answer generation and chat persistence.
+Name external services such as embedding providers, vector databases, rerankers, and LLM providers only when their usage is visible in the code.` : ""}
 
 Repository answer rules:
 - Treat only the repository structure and retrieved repository code below as verified evidence.

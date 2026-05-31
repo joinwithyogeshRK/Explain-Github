@@ -49,6 +49,27 @@ function selectDiverseRepositoryChunks(chunks: string[], limit: number): string[
     .slice(0, limit)
 }
 
+function selectFacetEvidence(resultGroups: Awaited<ReturnType<typeof searchPinecone>>[]): string[] {
+  const selected: string[] = []
+  const seen = new Set<string>()
+
+  for (const group of resultGroups) {
+    let taken = 0
+
+    for (const chunk of group) {
+      if (seen.has(chunk.id)) continue
+
+      selected.push(chunk.text)
+      seen.add(chunk.id)
+      taken += 1
+
+      if (taken === 2) break
+    }
+  }
+
+  return selected
+}
+
 const pdf = async (req: Request, res: Response) => {
   try {
     const file   = req.file
@@ -143,9 +164,19 @@ const pdf = async (req: Request, res: Response) => {
       const uniqueChunks = Array.from(
         new Map(resultGroups.flat().map(chunk => [chunk.id, chunk])).values()
       )
+      const facetEvidence = selectFacetEvidence(resultGroups)
 
       console.log(`✅ Step 5 — Multi-query repo retrieval found ${uniqueChunks.length} unique candidates`)
       reranked = await rerankChunks(query, uniqueChunks.map(chunk => chunk.text), 24)
+
+      const rerankedChunks = reranked.map(chunk => chunk.text)
+      const balancedChunks = Array.from(new Set([...facetEvidence, ...rerankedChunks]))
+      reranked = balancedChunks.map((text, index) => ({
+        text,
+        relevanceScore: 0,
+        originalRank: index + 1,
+        newRank: index + 1,
+      }))
     } else {
       // Preserve exact code identifiers while adding related implementation terms
       // to improve vector retrieval for focused repository and PDF questions.
@@ -162,7 +193,7 @@ const pdf = async (req: Request, res: Response) => {
 
     const rerankedChunks = reranked.map(c => c.text)
     const relevantChunks = isBroadRepoQuery
-      ? selectDiverseRepositoryChunks(rerankedChunks, 16)
+      ? selectDiverseRepositoryChunks(rerankedChunks, 20)
       : rerankedChunks
     console.log(`✅ Step 6 — ${relevantChunks.length} chunks reranked and ready`)
 
