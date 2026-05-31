@@ -12,11 +12,14 @@ const BROAD_REPOSITORY_HINTS = [
 ]
 
 const DEFAULT_REPOSITORY_SEARCH_FACETS = [
-  'server entry point route registration authentication middleware request flow',
-  'document ingestion repository indexing chunking embedding vector storage',
-  'query expansion embedding pinecone search hybrid retrieval reranking',
-  'answer generation repository context conversation history persistence response',
+  'server entry point route registration authentication middleware frontend API request flow',
+  'github repository indexing document ingestion chunking embedding vector storage pinecone',
+  'query expansion hyde voyage embeddings pinecone hybrid search bm25 cohere reranking',
+  'package.json dependencies imports SDK clients API endpoints groq supabase answer generation chat persistence response',
 ]
+
+const PROVIDER_MANIFEST_SEARCH =
+  'package.json dependencies imports SDK clients API endpoints voyage embeddings pinecone vector database cohere reranker groq llm supabase'
 
 export function isBroadRepositoryQuery(query: string): boolean {
   const lower = query.toLowerCase()
@@ -54,8 +57,9 @@ export async function generateRepositorySearchQueries(
           `You create internal search queries for a source-code repository.
            Expand the user's broad repository question into exactly 4 focused search queries
            that retrieve complementary implementation evidence. Cover different parts of the
-           requested flow, such as entry points, routes, indexing, retrieval, answer generation,
-           and persistence when relevant. Preserve exact identifiers from the question.
+           requested flow. For architecture questions, cover entry points and routes, indexing
+           and storage, query-time retrieval, and external provider clients or package manifests
+           such as package.json. Preserve exact identifiers from the question.
            Do not answer the question. Do not invent repository-specific identifiers.
            Return only a JSON array of 4 strings.`
       },
@@ -70,7 +74,7 @@ export async function generateRepositorySearchQueries(
 
   const generated = parseSearchQueries(response.choices[0]?.message?.content?.trim() ?? '')
   const facets = generated.length === 4 ? generated : DEFAULT_REPOSITORY_SEARCH_FACETS
-  const queries = [query, ...facets]
+  const queries = [query, ...facets, PROVIDER_MANIFEST_SEARCH]
 
   console.log(`  🔎 Search facets: ${queries.length}`)
   queries.forEach((searchQuery, i) => console.log(`    ${i + 1}. ${searchQuery.slice(0, 120)}`))
