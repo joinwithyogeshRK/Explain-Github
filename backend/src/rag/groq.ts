@@ -74,6 +74,19 @@ export const askGroq = async (
 ): Promise<string> => {
   const hasChunks   = relevantChunks.length > 0
   const hasRepoTree = !!repoContext
+  const repoAnswerGuide = repoContext
+    ? `
+
+Repository answer format:
+- Give a complete answer in one response. Prefer enough detail to solve the user's problem without requiring a follow-up.
+- Start with a short "Plan" section that lists the practical steps the answer will cover. This is an answer roadmap, not hidden reasoning.
+- Follow with a "Step-by-step explanation" section. Explain the relevant flow, functions, and files in a clear order.
+- Include focused code snippets when they help. Label each snippet with its file path, keep it relevant to the question, and explain what it does or what should change.
+- Add an "Improvement guidelines" section with specific ways the implementation can be made clearer, safer, faster, or easier to maintain.
+- End with a short "Conclusion" that summarizes the useful result or the next concrete action.
+- Adapt the sections to the question. Do not add filler, invent missing code, or include code snippets when the user only needs a simple file or structure list.
+`
+    : ""
 
   const referenceBlock = hasChunks
     ? relevantChunks.join("\n\n---\n\n")
@@ -110,6 +123,7 @@ Strict rules:
 - For code questions, use the relevant code section.
 - If something is not in the provided information, say so clearly rather than guessing.
 - Be specific — when listing files, list the actual files. When explaining code, reference actual file paths.
+${repoAnswerGuide}
 ${contextBlock}`
     : `${baseVoice}
 Answer using conversation history and your general knowledge when needed.`
@@ -124,7 +138,7 @@ Answer using conversation history and your general knowledge when needed.`
 
   const response = await groq.chat.completions.create({
     model:       "llama-3.3-70b-versatile",
-    max_tokens:  1024,
+    max_tokens:  repoContext ? 2048 : 1024,
     temperature: 0.35,
     messages,
   })
