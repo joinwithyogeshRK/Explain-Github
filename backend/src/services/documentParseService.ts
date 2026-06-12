@@ -11,8 +11,11 @@ const LLAMA_PARSE_POLL_INTERVAL_MS = Number(
 const PDF2JSON_MAX_SIZE_BYTES = Number(
   process.env.PDF2JSON_MAX_SIZE_BYTES ?? 5 * 1024 * 1024,
 );
+const PDF_PARSE_MAX_SIZE_BYTES = Number(
+  process.env.PDF_PARSE_MAX_SIZE_BYTES ?? 20 * 1024 * 1024,
+);
 
-export type ExtractionMethod = "pdf2json" | "llamaparse";
+export type ExtractionMethod = "pdf2json" | "pdf-parse" | "llamaparse";
 
 interface LlamaParseUploadResponse {
   id?: string;
@@ -78,7 +81,14 @@ function describeLlamaParseError(error: unknown): string {
   const detail = error.response?.data?.detail;
   if (Array.isArray(detail)) {
     const messages = detail
-      .map((item: any) => item?.msg)
+      .map((item: any) => {
+        const msg = item?.msg;
+        if (typeof msg !== "string") return null;
+        const field = Array.isArray(item?.loc)
+          ? item.loc.filter((part: unknown) => typeof part === "string").join(".")
+          : "";
+        return field ? `${field}: ${msg}` : msg;
+      })
       .filter((message: unknown): message is string => typeof message === "string");
     if (messages.length) return messages.join("; ");
   }
@@ -98,11 +108,12 @@ async function parseWithLlamaParse(
     filename: fileName,
     contentType: mimeType || "application/octet-stream",
   });
+  formData.append("purpose", "parse");
 
   let upload;
   try {
     upload = await axios.post<LlamaParseUploadResponse>(
-      `${LLAMA_PARSE_BASE_URL}/api/v1/files/`,
+      `${LLAMA_PARSE_BASE_URL}/api/v1/beta/files`,
       formData,
       {
         headers: {
@@ -187,6 +198,12 @@ async function parseWithLlamaParse(
   throw new Error("LlamaParse timed out while parsing this file.");
 }
 
+const tryPdfParse = async (buffer: Buffer): Promise<string> => {
+  const { default: pdfParse } = await import("pdf-parse-fork");
+  const result = await pdfParse(buffer);
+  return result.text ?? "";
+};
+
 const tryPdf2Json = (buffer: Buffer): Promise<string> => {
   return new Promise((resolve, reject) => {
     import("pdf2json")
@@ -209,29 +226,48 @@ const tryPdf2Json = (buffer: Buffer): Promise<string> => {
   });
 };
 
+const hasUsableText = (text: string, minLength = 50): boolean =>
+  Boolean(text && text.trim().length >= minLength);
+
 export const extractTextFromFile = async (
   fileBuffer: Buffer,
   fileName: string = "upload",
   mimeType: string = "application/octet-stream",
 ): Promise<{ text: string; method: ExtractionMethod }> => {
-  const canUsePdf2Json =
-    isPdf(mimeType, fileName) && fileBuffer.length <= PDF2JSON_MAX_SIZE_BYTES;
+  if (isPdf(mimeType, fileName)) {
+    const sizeMb = Math.ceil(fileBuffer.length / 1024 / 1024);
 
-  if (canUsePdf2Json) {
-    try {
-      const text = await tryPdf2Json(fileBuffer);
-      if (text && text.trim().length >= 50) {
-        return { text, method: "pdf2json" };
+    if (fileBuffer.length <= PDF2JSON_MAX_SIZE_BYTES) {
+      try {
+        const text = await tryPdf2Json(fileBuffer);
+        if (hasUsableText(text)) {
+          return { text, method: "pdf2json" };
+        }
+        console.log("⚠️  pdf2json returned insufficient text — trying pdf-parse...");
+      } catch {
+        console.log("⚠️  pdf2json failed — trying pdf-parse...");
       }
-      console.log("⚠️  pdf2json returned insufficient text — trying LlamaParse...");
-    } catch {
-      console.log("⚠️  pdf2json failed — trying LlamaParse...");
+    } else {
+      console.log(
+        `ℹ️  PDF is ${sizeMb}MB; skipping pdf2json to protect server memory.`,
+      );
     }
-  } else if (isPdf(mimeType, fileName)) {
-    console.log(
-      `ℹ️  PDF is ${Math.ceil(fileBuffer.length / 1024 / 1024)}MB; ` +
-        "skipping pdf2json to protect server memory and using LlamaParse directly.",
-    );
+
+    if (fileBuffer.length <= PDF_PARSE_MAX_SIZE_BYTES) {
+      try {
+        const text = await tryPdfParse(fileBuffer);
+        if (hasUsableText(text)) {
+          return { text, method: "pdf-parse" };
+        }
+        console.log("⚠️  pdf-parse returned insufficient text — trying LlamaParse...");
+      } catch {
+        console.log("⚠️  pdf-parse failed — trying LlamaParse...");
+      }
+    } else {
+      console.log(
+        `ℹ️  PDF is ${sizeMb}MB; skipping pdf-parse and using LlamaParse directly.`,
+      );
+    }
   }
 
   const text = await parseWithLlamaParse(fileBuffer, fileName, mimeType);
