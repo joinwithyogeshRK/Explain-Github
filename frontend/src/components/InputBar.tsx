@@ -571,7 +571,7 @@ export const InputBar = ({
           <div className="flex items-center gap-1 sm:gap-1.5">
             <AnimatePresence mode="wait">
               {!file ? (
-                <Tooltip content={signedIn ? "Attach PDF document" : "Sign in to attach PDF"} side="top">
+                <Tooltip content={signedIn ? "Attach file" : "Sign in to attach a file"} side="top">
                 <motion.label
                   key="attach"
                   className={cn(
@@ -588,7 +588,6 @@ export const InputBar = ({
                   {signedIn && (
                     <input
                       type="file"
-                      accept="application/pdf"
                       className="hidden"
                       onChange={onFileChange}
                     />
@@ -822,7 +821,7 @@ export const InputBar = ({
             filtering · {selectedSource.replace("github:", "").slice(0, 28)}
           </span>
         ) : (
-          <span>PDF · Voice · GitHub</span>
+          <span>Files · Voice · GitHub</span>
         )}
       </p>
     </motion.div>

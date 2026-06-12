@@ -1,6 +1,6 @@
 import type { Request, Response } from "express"
 import { createClient } from "@supabase/supabase-js"
-import { extractTextFromPDF } from "../services/ocrService.js"
+import { extractTextFromFile } from "../services/documentParseService.js"
 import { chunkText } from "../rag/chunker.js"
 import { embedChunks, embedQuery } from "../rag/embedder.js"
 import { searchPinecone, storeInPinecone } from "../rag/pinecone.js"
@@ -99,20 +99,24 @@ const pdf = async (req: Request, res: Response) => {
 
     let bm25Chunks: BM25Chunk[] = []
 
-    // ── Process PDF if uploaded ─────────────────────────────
+    // ── Process uploaded file if present ────────────────────
     if (file && file.buffer) {
       let text: string
 
       try {
-        const result = await extractTextFromPDF(file.buffer, file.originalname)
+        const result = await extractTextFromFile(
+          file.buffer,
+          file.originalname,
+          file.mimetype
+        )
         text = result.text
         console.log(`✅ Step 1 — Text extracted via ${result.method} (${text.length} chars)`)
       } catch (extractionError: unknown) {
-        console.error("PDF extraction failed:", extractionError)
+        console.error("File extraction failed:", extractionError)
         const msg  = extractionError instanceof Error ? extractionError.message : ""
         const safe = msg && !/_KEY|SECRET|TOKEN|password|environment variable/i.test(msg)
         return res.status(422).json({
-          error: safe ? msg : "We couldn't process this PDF. Try a different file or a smaller PDF.",
+          error: safe ? msg : "We couldn't process this file. Try a different file or a smaller upload.",
         })
       }
 

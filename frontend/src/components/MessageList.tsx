@@ -42,8 +42,8 @@ const CAPABILITIES: {
 }[] = [
   {
     icon: FileText,
-    title: "PDF documents",
-    description: "Attach a PDF with the paperclip, then ask questions about its content.",
+    title: "Files",
+    description: "Attach a document, image, or spreadsheet, then ask questions about its content.",
   },
   {
     icon: Mic,
@@ -410,7 +410,7 @@ export const MessageList = ({
                 Begin your inquiry
               </h2>
               <p className="mx-auto mt-1.5 max-w-[34rem] text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                Upload a PDF, use voice, or index a GitHub repo — then ask Oracle anything
+                Upload a file, use voice, or index a GitHub repo — then ask Oracle anything
                 about your sources.
               </p>
             </div>

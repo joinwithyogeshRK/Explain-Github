@@ -446,10 +446,6 @@ const ChatPage = () => {
     if (!signedIn) return
     const f = e.target.files?.[0]
     if (!f) return
-    if (f.type !== "application/pdf") {
-      alert("Only PDF files are allowed")
-      return
-    }
     setFile(f)
     setFileName(f.name)
   }

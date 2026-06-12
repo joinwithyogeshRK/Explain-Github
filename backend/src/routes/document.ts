@@ -15,14 +15,14 @@ router.use(requireClerkSession)
 
 // ─────────────────────────────────────────────────────────────
 // GET /documents/list
-// Returns all PDFs + repos for this user from Supabase
-// PDFs come from documents table, repos from repo_trees table
+// Returns all uploaded files + repos for this user from Supabase
+// Files come from documents table, repos from repo_trees table
 // ─────────────────────────────────────────────────────────────
 router.get("/list", async (req: Request, res: Response) => {
   try {
     const userId = req.supabaseUserId!
 
-    // Fetch PDFs from documents table
+    // Fetch uploaded files from documents table
     const { data: docRows, error: docError } = await supabase
       .from("documents")
       .select("source, uploaded_at")
@@ -40,9 +40,9 @@ router.get("/list", async (req: Request, res: Response) => {
 
     if (repoError) throw repoError
 
-    // Deduplicate PDFs by source
+    // Deduplicate uploaded files by source
     const seen    = new Set<string>()
-    const pdfDocs = (docRows ?? []).filter((row: any) => {
+    const fileDocs = (docRows ?? []).filter((row: any) => {
       if (seen.has(row.source)) return false
       seen.add(row.source)
       return true
@@ -59,10 +59,10 @@ router.get("/list", async (req: Request, res: Response) => {
       uploadedAt: row.indexed_at,
     }))
 
-    // Combine — PDFs first, then repos
-    const documents = [...pdfDocs, ...repoDocs]
+    // Combine — uploaded files first, then repos
+    const documents = [...fileDocs, ...repoDocs]
 
-    console.log(`✅ Documents list: ${pdfDocs.length} PDFs + ${repoDocs.length} repos`)
+    console.log(`✅ Documents list: ${fileDocs.length} files + ${repoDocs.length} repos`)
     res.json({ documents })
 
   } catch (err) {
@@ -74,7 +74,7 @@ router.get("/list", async (req: Request, res: Response) => {
 // ─────────────────────────────────────────────────────────────
 // DELETE /documents/delete
 // Body: { source: string }
-// Handles both PDFs (source = filename) and repos (source = github:owner/repo)
+// Handles both uploaded files (source = filename) and repos (source = github:owner/repo)
 // Deletes from Pinecone + Supabase
 // ─────────────────────────────────────────────────────────────
 router.delete("/delete", async (req: Request, res: Response) => {
@@ -88,7 +88,7 @@ router.delete("/delete", async (req: Request, res: Response) => {
     }
 
     const isRepo = source.startsWith("github:")
-    console.log(`🗑  Delete — user: ${userId}  source: ${source}  type: ${isRepo ? "repo" : "pdf"}`)
+    console.log(`🗑  Delete — user: ${userId}  source: ${source}  type: ${isRepo ? "repo" : "file"}`)
 
     // ── 1. Collect Pinecone vector IDs ──────────────────────
     const queryRes = await index.query({
@@ -139,7 +139,7 @@ router.delete("/delete", async (req: Request, res: Response) => {
       }
       console.log(`  ✅ Supabase repo_trees: deleted ${repoName}`)
     } else {
-      // PDF — delete from documents
+      // Uploaded file — delete from documents
       const { error, count } = await supabase
         .from("documents")
         .delete({ count: "exact" })

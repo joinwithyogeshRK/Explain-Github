@@ -27,7 +27,13 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
 const PORT = process.env.PORT || 3009;
-const data = multer().single("File");
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: Number(process.env.MAX_UPLOAD_SIZE_BYTES ?? 50 * 1024 * 1024),
+    },
+});
+const data = upload.single("File");
 const router1 = Router();
 app.use(router1);
 router1.post("/query", requireClerkSession, data, test);
