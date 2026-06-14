@@ -17,16 +17,6 @@ const PDF_PARSE_MAX_SIZE_BYTES = Number(
 
 export type ExtractionMethod = "pdf2json" | "pdf-parse" | "llamaparse";
 
-interface LlamaParseUploadResponse {
-  id?: string;
-}
-
-interface LlamaParseJobResponse {
-  id?: string;
-  status?: string;
-  error?: string;
-}
-
 interface LlamaParseResultResponse {
   job?: {
     status?: string;
@@ -103,17 +93,22 @@ async function parseWithLlamaParse(
 ): Promise<string> {
   const apiKey = getLlamaCloudApiKey();
 
+  const configuration = JSON.stringify({
+    tier: LLAMA_PARSE_TIER,
+    version: LLAMA_PARSE_VERSION,
+  });
+
   const formData = new FormData();
   formData.append("file", fileBuffer, {
     filename: fileName,
     contentType: mimeType || "application/octet-stream",
   });
-  formData.append("purpose", "parse");
+  formData.append("configuration", configuration);
 
   let upload;
   try {
-    upload = await axios.post<LlamaParseUploadResponse>(
-      `${LLAMA_PARSE_BASE_URL}/api/v1/beta/files`,
+    upload = await axios.post(
+      `${LLAMA_PARSE_BASE_URL}/api/v2alpha1/parse/upload`,
       formData,
       {
         headers: {
@@ -126,43 +121,22 @@ async function parseWithLlamaParse(
       },
     );
   } catch (error) {
+    console.error("[LlamaParse] Upload+parse failed:", JSON.stringify(error instanceof Error ? error.message : error).slice(0, 500));
     throw new Error(describeLlamaParseError(error));
   }
 
-  const fileId = upload.data.id;
-  if (!fileId) throw new Error("LlamaParse upload did not return a file id.");
-
-  let job;
-  try {
-    job = await axios.post<LlamaParseJobResponse>(
-      `${LLAMA_PARSE_BASE_URL}/api/v2/parse`,
-      {
-        file_id: fileId,
-        tier: LLAMA_PARSE_TIER,
-        version: LLAMA_PARSE_VERSION,
-      },
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        timeout: LLAMA_PARSE_TIMEOUT_MS,
-      },
-    );
-  } catch (error) {
-    throw new Error(describeLlamaParseError(error));
+  const jobId = upload.data.id;
+  if (!jobId) {
+    console.error("[LlamaParse] Upload response missing job id:", JSON.stringify(upload.data).slice(0, 500));
+    throw new Error("LlamaParse did not return a job id.");
   }
-
-  const jobId = job.data.id;
-  if (!jobId) throw new Error("LlamaParse did not return a parse job id.");
 
   const startedAt = Date.now();
   while (Date.now() - startedAt < LLAMA_PARSE_TIMEOUT_MS) {
     let result;
     try {
-      result = await axios.get<LlamaParseResultResponse>(
-        `${LLAMA_PARSE_BASE_URL}/api/v2/parse/${jobId}?expand=markdown_full,text_full`,
+      result = await axios.get(
+        `${LLAMA_PARSE_BASE_URL}/api/v2/parse/${jobId}?expand=markdown_full,text_full,markdown,text`,
         {
           headers: {
             Accept: "application/json",
@@ -179,6 +153,7 @@ async function parseWithLlamaParse(
     if (status === "COMPLETED" || status === "SUCCESS") {
       const text = extractMarkdownOrText(result.data);
       if (!text || text.length < 20) {
+        console.error("[LlamaParse] Response had insufficient text:", JSON.stringify(result.data).slice(0, 800));
         throw new Error("LlamaParse returned no readable text.");
       }
       return text;
