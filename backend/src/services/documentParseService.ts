@@ -14,7 +14,7 @@ const PDF2JSON_MAX_SIZE_BYTES = Number(
 const PDF_PARSE_MAX_SIZE_BYTES = Number(
   process.env.PDF_PARSE_MAX_SIZE_BYTES ?? 20 * 1024 * 1024,
 );
-const LLAMA_PARSE_FILES_BASE_URL = `${LLAMA_PARSE_BASE_URL}/api/v1/beta`;
+const LLAMA_PARSE_FILES_URL = `${LLAMA_PARSE_BASE_URL}/api/v1/files`;
 
 export type ExtractionMethod = "pdf2json" | "pdf-parse" | "llamaparse";
 
@@ -103,7 +103,7 @@ async function uploadFileToLlamaCloud(
 
   try {
     const response = await axios.post(
-      `${LLAMA_PARSE_FILES_BASE_URL}/files`,
+      LLAMA_PARSE_FILES_URL,
       formData,
       {
         headers: {
@@ -148,7 +148,8 @@ async function createParseJob(
         timeout: LLAMA_PARSE_TIMEOUT_MS,
       },
     );
-    const jobId: string = response.data.job?.id || response.data.id;
+    const jobId: string =
+      response.data.job?.id ?? response.data.id ?? response.data.job_id;
     if (!jobId) {
       console.error("[LlamaParse] Parse job creation response missing job id:", JSON.stringify(response.data).slice(0, 500));
       throw new Error("LlamaParse did not return a job id.");
@@ -179,7 +180,9 @@ async function pollParseJob(jobId: string, apiKey: string): Promise<string> {
       throw new Error(describeLlamaParseError(error));
     }
 
-    const status = result.data.job?.status?.toUpperCase();
+    const status = (
+      result.data.job?.status ?? result.data.status ?? ""
+    ).toUpperCase();
     if (status === "COMPLETED" || status === "SUCCESS") {
       const text = extractMarkdownOrText(result.data);
       if (!text || text.length < 20) {
@@ -250,44 +253,67 @@ const tryPdf2Json = (buffer: Buffer): Promise<string> => {
 const hasUsableText = (text: string, minLength = 50): boolean =>
   Boolean(text && text.trim().length >= minLength);
 
+const tryLocalPdfExtraction = async (
+  fileBuffer: Buffer,
+): Promise<{ text: string; method: ExtractionMethod } | null> => {
+  const sizeMb = Math.ceil(fileBuffer.length / 1024 / 1024);
+
+  if (fileBuffer.length <= PDF2JSON_MAX_SIZE_BYTES) {
+    try {
+      const text = await tryPdf2Json(fileBuffer);
+      if (hasUsableText(text)) {
+        return { text, method: "pdf2json" };
+      }
+      console.log("⚠️  pdf2json returned insufficient text — trying pdf-parse...");
+    } catch {
+      console.log("⚠️  pdf2json failed — trying pdf-parse...");
+    }
+  } else {
+    console.log(
+      `ℹ️  PDF is ${sizeMb}MB; skipping pdf2json to protect server memory.`,
+    );
+  }
+
+  if (fileBuffer.length <= PDF_PARSE_MAX_SIZE_BYTES) {
+    try {
+      const text = await tryPdfParse(fileBuffer);
+      if (hasUsableText(text)) {
+        return { text, method: "pdf-parse" };
+      }
+      console.log("⚠️  pdf-parse returned insufficient text.");
+    } catch {
+      console.log("⚠️  pdf-parse failed.");
+    }
+  } else {
+    console.log(
+      `ℹ️  PDF is ${sizeMb}MB; skipping pdf-parse to protect server memory.`,
+    );
+  }
+
+  return null;
+};
+
 export const extractTextFromFile = async (
   fileBuffer: Buffer,
   fileName: string = "upload",
   mimeType: string = "application/octet-stream",
 ): Promise<{ text: string; method: ExtractionMethod }> => {
   if (isPdf(mimeType, fileName)) {
-    const sizeMb = Math.ceil(fileBuffer.length / 1024 / 1024);
-
-    if (fileBuffer.length <= PDF2JSON_MAX_SIZE_BYTES) {
-      try {
-        const text = await tryPdf2Json(fileBuffer);
-        if (hasUsableText(text)) {
-          return { text, method: "pdf2json" };
-        }
-        console.log("⚠️  pdf2json returned insufficient text — trying pdf-parse...");
-      } catch {
-        console.log("⚠️  pdf2json failed — trying pdf-parse...");
-      }
-    } else {
-      console.log(
-        `ℹ️  PDF is ${sizeMb}MB; skipping pdf2json to protect server memory.`,
+    try {
+      const text = await parseWithLlamaParse(fileBuffer, fileName, mimeType);
+      return { text, method: "llamaparse" };
+    } catch (llamaError) {
+      console.error(
+        "[LlamaParse] Primary PDF parse failed — falling back to local parsers:",
+        llamaError instanceof Error ? llamaError.message : llamaError,
       );
-    }
 
-    if (fileBuffer.length <= PDF_PARSE_MAX_SIZE_BYTES) {
-      try {
-        const text = await tryPdfParse(fileBuffer);
-        if (hasUsableText(text)) {
-          return { text, method: "pdf-parse" };
-        }
-        console.log("⚠️  pdf-parse returned insufficient text — trying LlamaParse...");
-      } catch {
-        console.log("⚠️  pdf-parse failed — trying LlamaParse...");
+      const localResult = await tryLocalPdfExtraction(fileBuffer);
+      if (localResult) {
+        return localResult;
       }
-    } else {
-      console.log(
-        `ℹ️  PDF is ${sizeMb}MB; skipping pdf-parse and using LlamaParse directly.`,
-      );
+
+      throw llamaError;
     }
   }
 

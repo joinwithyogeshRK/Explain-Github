@@ -11,8 +11,8 @@ import documentRouter from "./routes/document.js";
 import transcribeRouter from "./routes/transcribe.js";
 import githubRouter from "./routes/github.js"; // ← ADD
 const defaultOrigins = [
-    "https://oracle-lyart-six.vercel.app",
-    "http://localhost:5173"
+    "https://advanced-rag-pipeline.vercel.app",
+    "http://localhost:5173",
 ];
 const origins = process.env.FRONTEND_ORIGINS?.split(",")
     .map((o) => o.trim())
