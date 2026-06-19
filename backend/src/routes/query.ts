@@ -22,7 +22,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY!
 )
 
-const pdf = async (req: Request, res: Response) => {
+const query = async (req: Request, res: Response) => {
   try {
     const file   = req.file
     const query  = req.body.query
@@ -30,22 +30,17 @@ const pdf = async (req: Request, res: Response) => {
     let   chatId = req.body.chatId
 
     const filterSource = req.body.filterSource as string | undefined
-    const filterAfter  = req.body.filterAfter  as number | undefined
-    const filterBefore = req.body.filterBefore as number | undefined
+ 
 
     if (!query || !query.trim()) {
       return res.status(400).json({ error: "No query provided." })
     }
 
     const metadataFilter: MetadataFilter | undefined = (() => {
-      if (!filterSource && !filterAfter && !filterBefore) return undefined
+      if (!filterSource) return undefined
       const filter: MetadataFilter = {}
       if (filterSource) filter.source = filterSource
-      if (filterAfter || filterBefore) {
-        filter.uploadedAt = {}
-        if (filterAfter)  filter.uploadedAt.after  = filterAfter
-        if (filterBefore) filter.uploadedAt.before = filterBefore
-      }
+    
       return filter
     })()
 
@@ -212,4 +207,4 @@ const pdf = async (req: Request, res: Response) => {
   }
 }
 
-export default pdf
+export default query

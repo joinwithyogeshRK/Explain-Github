@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import { Router } from "express";
 import multer from "multer";
-import test from "./routes/pdf.js";
+import query from "./routes/query.js";
 import historyRouter from "./routes/history.js";
 import githubAuthRouter from "./routes/githubAuth.js";
 import { requireClerkSession } from "./middleware/requireClerk.js";
@@ -38,7 +38,7 @@ const data = multer().single("File");
 const router1 = Router();
 app.use(router1);
 
-router1.post("/query",           requireClerkSession, data, test);
+router1.post("/query",           requireClerkSession, data, query);
 router1.use("/history",          historyRouter);
 router1.use("/auth/github",      githubAuthRouter);
 router1.use("/documents",        documentRouter);
