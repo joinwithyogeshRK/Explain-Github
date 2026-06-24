@@ -71,6 +71,7 @@ export const askGroq = async (
     repoName: string
     tree:     { path: string; type: string; size?: number }[]
   },
+  mode: "code" | "pdf" = "code",
 ): Promise<string> => {
   const hasChunks   = relevantChunks.length > 0
   const hasRepoTree = !!repoContext
@@ -95,13 +96,21 @@ export const askGroq = async (
   }
 
   if (referenceBlock) {
-    contextBlock += `\n\n=== RELEVANT CODE / CONTENT ===\n${referenceBlock}\n`
+    const contextLabel = mode === "pdf"
+      ? "RELEVANT PDF TEXT"
+      : "RELEVANT CODE / CONTENT"
+    contextBlock += `\n\n=== ${contextLabel} ===\n${referenceBlock}\n`
   }
 
-  const systemPrompt = (hasChunks || hasRepoTree)
-    ? `${baseVoice}
+  const groundedRules = mode === "pdf"
+    ? `You have access to extracted PDF text. Use it to explain, summarize, or answer accurately.
 
-You have access to the following information about this project. Use it to answer accurately.
+Strict rules:
+- Do not mention chunks, passages, retrieval, RAG, embeddings, or "provided material".
+- You may say "the PDF" when the user asks about the uploaded or selected PDF.
+- If something is not in the PDF text, say so clearly rather than guessing.
+- Explain in plain language and preserve important numbers, names, dates, obligations, and caveats.`
+    : `You have access to the following information about this project. Use it to answer accurately.
 
 Strict rules:
 - Do not mention chunks, passages, retrieval, RAG, embeddings, or "the document" / "provided material" / "Chunk 1".
@@ -109,7 +118,12 @@ Strict rules:
 - For file/structure questions, use the repository structure section to give precise accurate answers.
 - For code questions, use the relevant code section.
 - If something is not in the provided information, say so clearly rather than guessing.
-- Be specific — when listing files, list the actual files. When explaining code, reference actual file paths.
+- Be specific — when listing files, list the actual files. When explaining code, reference actual file paths.`
+
+  const systemPrompt = (hasChunks || hasRepoTree)
+    ? `${baseVoice}
+
+${groundedRules}
 ${contextBlock}`
     : `${baseVoice}
 Answer using conversation history and your general knowledge when needed.`

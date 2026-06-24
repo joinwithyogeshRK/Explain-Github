@@ -61,6 +61,7 @@ router.post("/index", async (req: Request, res: Response) => {
       fileCount:    result.fileCount,
       chunkCount:   result.chunkCount,
       skippedCount: result.skippedCount,
+      savedFileCount: result.savedFileCount,
       tree:         result.tree,
     })
 

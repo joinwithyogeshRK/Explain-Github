@@ -1,16 +1,14 @@
 import type { Request, Response } from "express"
 import { createClient } from "@supabase/supabase-js"
-import { extractTextFromFile } from "../services/documentParseService.js"
-import { chunkText } from "../rag/chunker.js"
-import { embedChunks, embedQuery } from "../rag/embedder.js"
-import { storeInPinecone } from "../rag/pinecone.js"
-import { hybridSearch } from "../rag/hybridSearch.js"
+import { hybridSearchText } from "../rag/hybridSearch.js"
 import { rerankChunks } from "../rag/reranker.js"
 import { generateHypotheticalDocument } from "../rag/hyde.js"
 import type { BM25Chunk } from "../rag/bm25.js"
 import type { MetadataFilter } from "../rag/pinecone.js"
 import { askGroq, isStructuralQuery } from "../rag/groq.js"
 import { evalRAG } from "../rag/evaluator.js"
+import { ingestPdfToIndex, searchPdfIndex } from "../rag/pdfPipeline.js"
+import { routeQueryIntent } from "../agents/intentRouterAgent.js"
 import {
   createChat,
   saveMessage,
@@ -47,15 +45,31 @@ const query = async (req: Request, res: Response) => {
     })()
 
     let bm25Chunks: BM25Chunk[] = []
+    let pipeline: "code" | "pdf" = "code"
 
 
     if (file && file.buffer) {
-      let text: string
-      // try catch block to extract the text from the pdf and to throw error if any
       try {
-        const result = await extractTextFromFile(file.buffer, file.originalname, file.mimetype)
-        text = result.text
-        console.log(`✅ Step 1 — Text extracted via ${result.method} (${text.length} chars)`)
+        const pdfResult = await ingestPdfToIndex(file, userId)
+        bm25Chunks = pdfResult.bm25Chunks
+        pipeline = "pdf"
+
+        const { error: docError } = await supabase
+          .from("documents")
+          .upsert(
+            {
+              user_id: userId,
+              source: pdfResult.source,
+              uploaded_at: pdfResult.uploadedAt,
+            },
+            { onConflict: "user_id,source" }
+          )
+
+        if (docError) {
+          console.warn("⚠️  Failed to record PDF in Supabase:", docError.message)
+        } else {
+          console.log("✅ PDF Step 4b — PDF recorded in Supabase")
+        }
       } catch (extractionError: unknown) {
         console.error("PDF extraction failed:", extractionError)
         const msg  = extractionError instanceof Error ? extractionError.message : ""
@@ -68,48 +82,34 @@ const query = async (req: Request, res: Response) => {
         return res.status(422).json({
           error: safe
             ? msg
-            : "We couldn't process this document. Try a different PDF or DOCX file.",
+            : "We couldn't process this PDF. Try a different PDF file.",
         })
-      }
-
-      const chunks = chunkText(text)
-      console.log(`✅ Step 2 — ${chunks.length} chunks created`)
-
-      const ts     = Date.now()
-      const source = file.originalname
-
-      bm25Chunks = chunks.map((chunkText, i) => ({
-        id:   `${userId}-${ts}-${i}`,
-        text: chunkText,
-      }))
-
-      const embeddedChunks = await embedChunks(chunks)
-      console.log("✅ Step 3 — Chunks embedded")
-
-      await storeInPinecone(embeddedChunks, userId, ts, source)
-      console.log("✅ Step 4 — Stored in Pinecone")
-
-      const { error: docError } = await supabase
-        .from("documents")
-        .upsert(
-          { user_id: userId, source, uploaded_at: ts },
-          { onConflict: "user_id,source" }
-        )
-
-      if (docError) {
-        console.warn("⚠️  Failed to record document in Supabase:", docError.message)
-      } else {
-        console.log("✅ Step 4b — Document recorded in Supabase")
       }
     }
 
-    // Step 5 — HyDE + Embed
-    const hypothetical = await generateHypotheticalDocument(query)
-    const queryVector  = await embedQuery(hypothetical)
-    console.log("✅ Step 5 — HyDE generated + embedded")
+    const intentDecision = routeQueryIntent({
+      hasFile: Boolean(file && file.buffer),
+      filterSource,
+      query,
+    })
+    console.log(
+      `🧭 IntentRouterAgent: ${intentDecision.intent} (${intentDecision.confidence}) — ${intentDecision.reason}`,
+    )
 
-    // Step 6 — Hybrid Search → Rerank
-    const hybridChunks   = await hybridSearch(queryVector, query, bm25Chunks, userId, 5, metadataFilter)
+    const isRepoQuery = filterSource?.startsWith("github:") ?? false
+    const isPdfQuery = intentDecision.intent === "pdf"
+
+    pipeline = isPdfQuery ? "pdf" : "code"
+
+    // Step 5/6 — Pipeline-specific retrieval → Rerank
+    const hybridChunks = isPdfQuery
+      ? await searchPdfIndex(query, userId, bm25Chunks, 5, metadataFilter)
+      : await (async () => {
+          const hypothetical = await generateHypotheticalDocument(query)
+          console.log("✅ Code Search — HyDE generated")
+          return hybridSearchText(hypothetical, query, bm25Chunks, userId, 5, metadataFilter)
+        })()
+
     const reranked       = await rerankChunks(query, hybridChunks.map(c => c.text))
     const relevantChunks = reranked.map(c => c.text)
     console.log(`✅ Step 6 — ${relevantChunks.length} chunks reranked and ready`)
@@ -119,7 +119,6 @@ const query = async (req: Request, res: Response) => {
     // fetch the full tree from Supabase and pass to Groq
     let repoContext: { repoName: string; tree: any[] } | undefined
 
-    const isRepoQuery    = filterSource?.startsWith("github:")
     const isStructural   = isStructuralQuery(query)
 
     if (isRepoQuery) {
@@ -174,7 +173,7 @@ const query = async (req: Request, res: Response) => {
     }
 
     // Step 8 — Ask Groq (with optional repo context)
-    const answer = await askGroq(query, relevantChunks, conversationHistory, repoContext)
+    const answer = await askGroq(query, relevantChunks, conversationHistory, repoContext, pipeline)
     console.log("✅ Step 8 — Answer generated")
 
     // Step 8b — Evaluate (non-blocking)
@@ -189,7 +188,7 @@ const query = async (req: Request, res: Response) => {
       console.log("✅ Step 9 — New chat created:", chatId)
     }
 
-    await saveMessage(chatId, userId, query, answer, !!(file && file.buffer))
+    await saveMessage(chatId, userId, query, answer, pipeline === "pdf")
     console.log("✅ Step 10 — Message saved to Supabase")
 
     res.json({
@@ -198,6 +197,8 @@ const query = async (req: Request, res: Response) => {
       meta: {
         source:          filterSource ?? "all",
         filter:          metadataFilter ?? null,
+        pipeline,
+        intent:          intentDecision,
         repoTreeInjected: !!repoContext,
         structuralQuery:  isStructural ?? false,
       },

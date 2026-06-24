@@ -1,4 +1,4 @@
-import { searchPinecone} from './pinecone.js'
+import { RAG_INDEX_NAME, searchPinecone, searchPineconeText} from './pinecone.js'
 import type { PineconeResult, MetadataFilter } from './pinecone.js'
 import { buildBM25Index, searchBM25 } from './bm25.js'
 import type  {BM25Chunk, BM25Result}  from './bm25.js'
@@ -72,18 +72,43 @@ export async function hybridSearch(
   userId:      string,
   topK:        number = 5,
   filter?:     MetadataFilter,         // ← NEW, optional
+  indexName:   string = RAG_INDEX_NAME,
 ): Promise<HybridChunk[]> {
 
-  console.log('\n🔍 Running Hybrid Search...')
+  console.log(`\n🔍 Running Hybrid Search on ${indexName}...`)
 
   const [vectorResults, bm25Results] = await Promise.all([
-    searchPinecone(queryVector, userId, topK, filter),   // ← filter passed here
+    searchPinecone(queryVector, userId, topK, filter, indexName),   // ← filter passed here
     Promise.resolve(
       searchBM25(queryText, buildBM25Index(allChunks), topK)
     )
   ])
 
   console.log(`  Vector hits: ${vectorResults.length} | BM25 hits: ${bm25Results.length}`)
+
+  return applyRRF(vectorResults, bm25Results, topK)
+}
+
+export async function hybridSearchText(
+  retrievalQueryText: string,
+  keywordQueryText:   string,
+  allChunks:          BM25Chunk[],
+  userId:             string,
+  topK:               number = 5,
+  filter?:            MetadataFilter,
+  indexName:          string = RAG_INDEX_NAME,
+): Promise<HybridChunk[]> {
+
+  console.log(`\n🔍 Running Integrated Hybrid Search on ${indexName}...`)
+
+  const [vectorResults, bm25Results] = await Promise.all([
+    searchPineconeText(retrievalQueryText, userId, topK, filter, indexName),
+    Promise.resolve(
+      searchBM25(keywordQueryText, buildBM25Index(allChunks), topK)
+    )
+  ])
+
+  console.log(`  Integrated hits: ${vectorResults.length} | BM25 hits: ${bm25Results.length}`)
 
   return applyRRF(vectorResults, bm25Results, topK)
 }

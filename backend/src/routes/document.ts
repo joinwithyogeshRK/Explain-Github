@@ -1,15 +1,18 @@
 import { Router, type Request, type Response } from "express"
 import { requireClerkSession } from "../middleware/requireClerk.js"
-import { Pinecone } from "@pinecone-database/pinecone"
 import { createClient } from "@supabase/supabase-js"
+import {
+  getPineconeIndex,
+  PDF_INDEX_NAME,
+  PINECONE_VECTOR_DIMENSION,
+  RAG_INDEX_NAME,
+} from "../rag/pinecone.js"
 
 const router   = Router()
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!
 )
-const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! })
-const index    = pinecone.index(process.env.PINECONE_INDEX_NAME ?? "rag-index")
 
 router.use(requireClerkSession)
 
@@ -90,13 +93,15 @@ router.delete("/delete", async (req: Request, res: Response) => {
 
     // A GitHub repo source is identified by the github: prefix and is stored in repo_trees.
     const isRepo = source.startsWith("github:")
-    console.log(`🗑  Delete — user: ${userId}  source: ${source}  type: ${isRepo ? "repo" : "pdf"}`)
+    const indexName = isRepo ? RAG_INDEX_NAME : PDF_INDEX_NAME
+    const index = getPineconeIndex(indexName)
+    console.log(`🗑  Delete — user: ${userId}  source: ${source}  type: ${isRepo ? "repo" : "pdf"}  index: ${indexName}`)
 
     // ── 1. Collect Pinecone vector IDs ──────────────────────
     // The query uses a zero vector plus a metadata filter to identify all vectors
     // belonging to this source for the current user.
     const queryRes = await index.query({
-      vector:          new Array(1024).fill(0),
+      vector:          new Array(PINECONE_VECTOR_DIMENSION).fill(0),
       topK:            10000,
       includeMetadata: false,
       filter: {
@@ -142,6 +147,23 @@ router.delete("/delete", async (req: Request, res: Response) => {
         return
       }
       console.log(`  ✅ Supabase repo_trees: deleted ${repoName}`)
+
+      const { error: filesError, count: filesCount } = await supabase
+        .from("repo_files")
+        .delete({ count: "exact" })
+        .eq("user_id", userId)
+        .eq("repo_name", repoName)
+
+      if (filesError) {
+        console.error("  ❌ Supabase repo_files delete error:", filesError)
+        res.status(207).json({
+          success: false,
+          message: "Deleted from Pinecone and repo_trees but repo_files deletion failed",
+          pineconeVectorsDeleted: ids.length,
+        })
+        return
+      }
+      console.log(`  ✅ Supabase repo_files: deleted ${filesCount ?? "?"} rows`)
     } else {
       // PDF — delete from documents
       const { error, count } = await supabase

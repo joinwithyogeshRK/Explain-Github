@@ -1,6 +1,11 @@
-import { embedChunks } from './embedder.js'
 import { chunkCodeContent, extractExt } from './codeChunker.js'
 import { getUserGithubToken } from '../services/githubOAuthService.js'
+import { RAG_INDEX_NAME, storeTextInPinecone } from './pinecone.js'
+import {
+  fetchRepoSnapshot,
+  parseGithubUrl as parseGithubUrlWithAgent,
+} from '../agents/repoTreeAgent.js'
+import { saveRepoFiles } from '../services/repoFileService.js'
 
 // ─────────────────────────────────────────────────────────────
 // TYPES
@@ -18,6 +23,7 @@ export interface IndexResult {
   fileCount:    number
   chunkCount:   number
   skippedCount: number
+  savedFileCount: number
   tree:         RepoFile[]
 }
 
@@ -165,16 +171,7 @@ async function buildHeaders(userId: string): Promise<Record<string, string>> {
 // ─────────────────────────────────────────────────────────────
 
 export function parseGithubUrl(url: string): { owner: string; repo: string } | null {
-  try {
-    const cleaned = url.trim().replace(/\/$/, '').replace(/\.git$/, '')
-    const match   = cleaned.match(
-      /^https?:\/\/github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)/
-    )
-    if (!match) return null
-    return { owner: match[1]!, repo: match[2]! }
-  } catch {
-    return null
-  }
+  return parseGithubUrlWithAgent(url)
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -308,38 +305,26 @@ async function fetchFilesInBatches(
 // ─────────────────────────────────────────────────────────────
 
 async function storeRepoInPinecone(
-  embeddedChunks: { text: string; vector: number[]; filePath: string }[],
+  chunks:         { text: string; filePath: string }[],
   userId:         string,
   ts:             number,
   source:         string,
   repoName:       string,
 ) {
-  const { Pinecone } = await import('@pinecone-database/pinecone')
-  const pinecone     = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! })
-  const index        = pinecone.index(process.env.PINECONE_INDEX_NAME ?? 'rag-index')
-
-  const BATCH = 100
-
-  for (let i = 0; i < embeddedChunks.length; i += BATCH) {
-    const batch   = embeddedChunks.slice(i, i + BATCH)
-    const vectors = batch.map((chunk, j) => ({
-      id:     `${userId}-${ts}-${i + j}`,
-      values: chunk.vector,
-      metadata: {
-        text:        chunk.text,
-        userId,
-        source,
-        filePath:    chunk.filePath,
-        repoName,
-        uploadedAt:  ts,
-        chunkIndex:  i + j,
-        totalChunks: embeddedChunks.length,
-      },
-    }))
-
-    await index.upsert({ records: vectors })
-    console.log(`  📌 Stored batch ${Math.floor(i / BATCH) + 1}/${Math.ceil(embeddedChunks.length / BATCH)}`)
-  }
+  await storeTextInPinecone(
+    chunks.map((chunk) => ({
+      text: chunk.text,
+      metadata: { filePath: chunk.filePath },
+    })),
+    userId,
+    ts,
+    source,
+    RAG_INDEX_NAME,
+    {
+      sourceType: 'github',
+      repoName,
+    },
+  )
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -354,44 +339,33 @@ export async function indexGithubRepo(
   const parsed = parseGithubUrl(repoUrl)
   if (!parsed) throw new Error('Invalid GitHub URL')
 
-  const { owner, repo } = parsed
-  const repoName        = `${owner}/${repo}`
+  const repoName = `${parsed.owner}/${parsed.repo}`
 
   console.log(`\n🐙 Indexing GitHub repo: ${repoName}`)
 
-  // Build auth headers once — reused for every request in this job
-  const headers  = await buildHeaders(userId)
-  const isAuthed = Boolean(headers['Authorization'])
-  console.log(`  🔑 Auth: ${isAuthed ? 'token present (5 000 req/hr)' : 'no token (60 req/hr)'}`)
+  const snapshot = await fetchRepoSnapshot(repoUrl, userId)
 
-  // 1. Fetch full tree (1 API call regardless of repo size)
-  console.log('  📁 Fetching repo tree...')
-  const allFiles = await fetchRepoTree(owner, repo, headers)
-  console.log(`  📁 Total blobs in repo: ${allFiles.length}`)
+  console.log(`  📁 Total blobs in repo: ${snapshot.allFiles.length}`)
+  console.log(`  ✅ Files fetched: ${snapshot.fetchedFiles.length}  (skipped ${snapshot.skippedCount} — incl. node_modules, binaries, lock files)`)
 
-  // 2. Filter before fetching any content
-  //    node_modules and other skip dirs are eliminated HERE — not after fetching
-  const validFiles   = allFiles.filter(f => !shouldSkipPath(f.path, f.size))
-  const skippedCount = allFiles.length - validFiles.length
+  const ts = Date.now()
+  const savedFileCount = await saveRepoFiles(
+    userId,
+    repoUrl,
+    repoName,
+    snapshot.fetchedFiles,
+    ts,
+  )
+  console.log(`  💾 Saved ${savedFileCount} fetched files to Supabase`)
 
-  console.log(`  ✅ Files to fetch: ${validFiles.length}  (skipped ${skippedCount} — incl. node_modules, binaries, lock files)`)
-
-  if (validFiles.length === 0) {
-    throw new Error('No indexable files found in this repository')
-  }
-
-  // 3. Fetch content via Git Blob API (parallel batches)
-  console.log('  📥 Fetching file contents via Git Blob API...')
-  const fileContents = await fetchFilesInBatches(owner, repo, validFiles, headers)
-
-  // 4. Chunk all files
+  // Chunk all files
   // FIX 4: use extractExt (filename only, compound-aware) instead of
   //         lastIndexOf on the full path — dots in directory names like
   //         `my.package/src/index.ts` would otherwise corrupt the ext.
   console.log('  ✂️  Chunking files...')
   const allChunks: { text: string; filePath: string }[] = []
 
-  for (const { file, content } of fileContents) {
+  for (const { file, content } of snapshot.fetchedFiles) {
     const { ext, compoundExt } = extractExt(file.path)
     // prefer the compound ext for chunker type detection when it's meaningful
     const effectiveExt = compoundExt || ext
@@ -405,27 +379,19 @@ export async function indexGithubRepo(
     throw new Error('No content could be extracted from this repository')
   }
 
-  // 5. Embed + store
-  console.log('  🔢 Embedding chunks...')
-  const ts       = Date.now()
+  // 5. Store text — Pinecone integrated inference embeds per index config
+  console.log('  📌 Storing chunks in Pinecone integrated index...')
   const source   = `github:${repoName}`
-  const texts    = allChunks.map(c => c.text)
-  const embedded = await embedChunks(texts)
+  await storeRepoInPinecone(allChunks, userId, ts, source, repoName)
 
-  const embeddedWithMeta = embedded.map((e, i) => ({
-    ...e,
-    filePath: allChunks[i]?.filePath ?? '',
-  }))
-
-  await storeRepoInPinecone(embeddedWithMeta, userId, ts, source, repoName)
-
-  console.log(`  ✅ Done. ${allChunks.length} chunks from ${fileContents.length} files`)
+  console.log(`  ✅ Done. ${allChunks.length} chunks from ${snapshot.fetchedFiles.length} files`)
 
   return {
     repoName,
-    fileCount:    fileContents.length,
+    fileCount:    snapshot.fetchedFiles.length,
     chunkCount:   allChunks.length,
-    skippedCount,
-    tree:         validFiles,
+    skippedCount: snapshot.skippedCount,
+    savedFileCount,
+    tree:         snapshot.validFiles,
   }
 }
