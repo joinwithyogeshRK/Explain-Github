@@ -107,8 +107,12 @@ export const askGroq = async (
 
 Strict rules:
 - Do not mention chunks, passages, retrieval, RAG, embeddings, or "provided material".
+- Do not say "according to the information" or "based on the information"; answer directly.
 - You may say "the PDF" when the user asks about the uploaded or selected PDF.
-- If something is not in the PDF text, say so clearly rather than guessing.
+- If the current PDF text conflicts with earlier conversation history, trust the current PDF text.
+- For list questions such as projects, skills, experience, education, or certifications, list every distinct item present in the PDF text you received.
+- Do not say an item is missing unless you have checked all received PDF text for that answer.
+- If something is not in the received PDF text, say so clearly rather than guessing.
 - Explain in plain language and preserve important numbers, names, dates, obligations, and caveats.`
     : `You have access to the following information about this project. Use it to answer accurately.
 

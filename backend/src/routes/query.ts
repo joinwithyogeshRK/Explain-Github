@@ -101,16 +101,19 @@ const query = async (req: Request, res: Response) => {
 
     pipeline = isPdfQuery ? "pdf" : "code"
 
+    const retrievalTopK = isPdfQuery ? Number(process.env.PDF_RETRIEVAL_TOP_K ?? 30) : 5
+    const rerankTopN = isPdfQuery ? Number(process.env.PDF_RERANK_TOP_N ?? 12) : 5
+
     // Step 5/6 — Pipeline-specific retrieval → Rerank
     const hybridChunks = isPdfQuery
-      ? await searchPdfIndex(query, userId, bm25Chunks, 5, metadataFilter)
+      ? await searchPdfIndex(query, userId, bm25Chunks, retrievalTopK, metadataFilter)
       : await (async () => {
           const hypothetical = await generateHypotheticalDocument(query)
           console.log("✅ Code Search — HyDE generated")
-          return hybridSearchText(hypothetical, query, bm25Chunks, userId, 5, metadataFilter)
+          return hybridSearchText(hypothetical, query, bm25Chunks, userId, retrievalTopK, metadataFilter)
         })()
 
-    const reranked       = await rerankChunks(query, hybridChunks.map(c => c.text))
+    const reranked       = await rerankChunks(query, hybridChunks.map(c => c.text), rerankTopN)
     const relevantChunks = reranked.map(c => c.text)
     console.log(`✅ Step 6 — ${relevantChunks.length} chunks reranked and ready`)
 

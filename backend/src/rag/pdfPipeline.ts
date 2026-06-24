@@ -7,6 +7,8 @@ import type { BM25Chunk } from "./bm25.js"
 import type { HybridChunk } from "./hybridSearch.js"
 import type { MetadataFilter } from "./pinecone.js"
 
+const PDF_DEFAULT_TOP_K = Number(process.env.PDF_RETRIEVAL_TOP_K ?? 30)
+
 interface UploadedFile {
   buffer: Buffer
   originalname: string
@@ -83,14 +85,19 @@ export async function searchPdfIndex(
   query: string,
   userId: string,
   bm25Chunks: BM25Chunk[] = [],
-  topK = 5,
+  topK = PDF_DEFAULT_TOP_K,
   filter?: MetadataFilter,
 ): Promise<HybridChunk[]> {
-  const hypothetical = await generateHypotheticalDocument(query)
-  console.log("✅ PDF Search — HyDE generated")
+  const retrievalQuery = shouldUseDirectPdfQuery(query)
+    ? query
+    : await generateHypotheticalDocument(query)
+
+  console.log(
+    `✅ PDF Search — ${retrievalQuery === query ? "using direct query" : "HyDE generated"} | topK=${topK}`,
+  )
 
   return hybridSearchText(
-    hypothetical,
+    retrievalQuery,
     query,
     bm25Chunks,
     userId,
@@ -98,4 +105,20 @@ export async function searchPdfIndex(
     filter,
     PDF_INDEX_NAME,
   )
+}
+
+function shouldUseDirectPdfQuery(query: string): boolean {
+  const normalized = query.toLowerCase()
+  return [
+    "project",
+    "projects",
+    "experience",
+    "skills",
+    "education",
+    "certifications",
+    "achievements",
+    "list",
+    "which are",
+    "what are",
+  ].some((signal) => normalized.includes(signal))
 }
