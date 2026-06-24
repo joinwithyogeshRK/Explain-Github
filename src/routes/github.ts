@@ -25,7 +25,7 @@ router.post("/index", async (req: Request, res: Response) => {
   const parsed = parseGithubUrl(repoUrl)
   if (!parsed) {
     return res.status(400).json({
-      error: "Invalid GitHub URL. Format: https://github.com/owner/repo"
+      error: "Invalid GitHub URL. Use https://github.com/owner/repo.git or git@github.com:owner/repo.git"
     })
   }
 

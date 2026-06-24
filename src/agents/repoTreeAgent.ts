@@ -62,12 +62,21 @@ const MAX_FILE_SIZE = Number(process.env.GITHUB_MAX_FILE_SIZE ?? 500_000)
 
 export function parseGithubUrl(url: string): { owner: string; repo: string } | null {
   try {
-    const cleaned = url.trim().replace(/\/$/, "").replace(/\.git$/, "")
-    const match = cleaned.match(
-      /^https?:\/\/github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)/,
-    )
-    if (!match) return null
-    return { owner: match[1]!, repo: match[2]! }
+    const trimmed = url.trim()
+    const patterns = [
+      /^https?:\/\/github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+?)(?:\.git)?(?:[/?#].*)?$/,
+      /^git@github\.com:([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+?)(?:\.git)?$/,
+      /^github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+?)(?:\.git)?(?:[/?#].*)?$/,
+    ]
+
+    for (const pattern of patterns) {
+      const match = trimmed.match(pattern)
+      if (match?.[1] && match?.[2]) {
+        return { owner: match[1], repo: match[2].replace(/\.git$/i, "") }
+      }
+    }
+
+    return null
   } catch {
     return null
   }
