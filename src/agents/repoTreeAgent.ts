@@ -34,7 +34,7 @@ const SKIP_EXTENSIONS = new Set([
   ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".bmp", ".tiff",
   ".exe", ".dll", ".so", ".dylib", ".bin", ".wasm",
   ".zip", ".tar", ".gz", ".rar", ".7z",
-  ".mp4", ".mp3", ".wav", ".avi", ".mov", ".pdf",
+  ".mp4", ".mp3", ".wav", ".avi", ".mov",
   ".csv", ".parquet", ".sqlite", ".db",
   ".min.js", ".min.css",
   ".map",

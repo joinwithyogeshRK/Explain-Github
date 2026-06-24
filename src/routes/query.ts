@@ -88,7 +88,7 @@ const query = async (req: Request, res: Response) => {
       ])
     }
 
-    const answer = await askGroq(question, relevantChunks, conversationHistory, repoContext, "code")
+    const answer = await askGroq(question, relevantChunks, conversationHistory, repoContext)
 
     evalRAG(question, relevantChunks, answer).catch((err) =>
       console.warn("⚠️  Eval failed silently:", err),

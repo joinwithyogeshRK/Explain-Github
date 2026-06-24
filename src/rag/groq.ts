@@ -71,7 +71,6 @@ export const askGroq = async (
     repoName: string
     tree:     { path: string; type: string; size?: number }[]
   },
-  mode: "code" | "pdf" = "code",
 ): Promise<string> => {
   const hasChunks   = relevantChunks.length > 0
   const hasRepoTree = !!repoContext
@@ -96,25 +95,10 @@ export const askGroq = async (
   }
 
   if (referenceBlock) {
-    const contextLabel = mode === "pdf"
-      ? "RELEVANT PDF TEXT"
-      : "RELEVANT CODE / CONTENT"
-    contextBlock += `\n\n=== ${contextLabel} ===\n${referenceBlock}\n`
+    contextBlock += `\n\n=== RELEVANT CODE / CONTENT ===\n${referenceBlock}\n`
   }
 
-  const groundedRules = mode === "pdf"
-    ? `You have access to extracted PDF text. Use it to explain, summarize, or answer accurately.
-
-Strict rules:
-- Do not mention chunks, passages, retrieval, RAG, embeddings, or "provided material".
-- Do not say "according to the information" or "based on the information"; answer directly.
-- You may say "the PDF" when the user asks about the uploaded or selected PDF.
-- If the current PDF text conflicts with earlier conversation history, trust the current PDF text.
-- For list questions such as projects, skills, experience, education, or certifications, list every distinct item present in the PDF text you received.
-- Do not say an item is missing unless you have checked all received PDF text for that answer.
-- If something is not in the received PDF text, say so clearly rather than guessing.
-- Explain in plain language and preserve important numbers, names, dates, obligations, and caveats.`
-    : `You have access to the following information about this project. Use it to answer accurately.
+  const groundedRules = `You have access to the following information about this project. Use it to answer accurately.
 
 Strict rules:
 - Do not mention chunks, passages, retrieval, RAG, embeddings, or "the document" / "provided material" / "Chunk 1".

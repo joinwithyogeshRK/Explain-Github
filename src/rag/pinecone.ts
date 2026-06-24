@@ -10,10 +10,6 @@ export const RAG_INDEX_NAME =
   process.env.PINECONE_INDEX_NAME ??
   "rag-index";
 
-export const PDF_INDEX_NAME =
-  process.env.PINECONE_PDF_INDEX_NAME ??
-  "pdf-index";
-
 export const PINECONE_VECTOR_DIMENSION = Number(
   process.env.PINECONE_VECTOR_DIMENSION ?? 1024,
 );
@@ -204,14 +200,11 @@ export const searchPineconeText = async (
     fields: [
       PINECONE_TEXT_FIELD,
       "source",
-      "sourceType",
       "filePath",
       "repoName",
-      "pdfName",
       "uploadedAt",
       "chunkIndex",
       "totalChunks",
-      "extractionMethod",
     ],
   });
 

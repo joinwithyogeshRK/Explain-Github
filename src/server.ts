@@ -2,17 +2,15 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { Router } from "express";
-import multer from "multer";
 import query from "./routes/query.js";
 import historyRouter from "./routes/history.js";
 import githubAuthRouter from "./routes/githubAuth.js";
 import { requireClerkSession } from "./middleware/requireClerk.js";
 import documentRouter from "./routes/document.js";
-import transcribeRouter from "./routes/transcribe.js";
 import githubRouter from "./routes/github.js";          // ← ADD
 
 const defaultOrigins = [
-  "https://advanced-rag-pipeline.vercel.app",
+  "https://explain-github-main.vercel.app",
   "http://localhost:5173",
 ];
 const origins =
@@ -33,16 +31,14 @@ app.use(
 );
 
 const PORT = process.env.PORT || 3009;
-const data = multer().single("File");
 
 const router1 = Router();
 app.use(router1);
 
-router1.post("/query",           requireClerkSession, data, query);
+router1.post("/query",           requireClerkSession, query);
 router1.use("/history",          historyRouter);
 router1.use("/auth/github",      githubAuthRouter);
 router1.use("/documents",        documentRouter);
-router1.use("/transcribe",       requireClerkSession, transcribeRouter);
 router1.use("/github",           githubRouter);          // ← ADD
 
 app.listen(PORT, function (err: unknown) {
